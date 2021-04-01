@@ -9,6 +9,7 @@ using Microsoft.CSharp;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.Assertions;
 using static System.String;
 
 namespace AlkimeeGames.TagLayerTypeGenerator.Editor
@@ -26,7 +27,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         private readonly string _layerFilePath = $"{Application.dataPath}/{Settings.Layer.FilePath}";
 
         /// <summary>Used to read the values from the Enum. If we don't use reflection to find the Enums, we tie ourselves to a specific configuration which isn't ideal.</summary>
-        private readonly Type _layerType = Type.GetType($"{Settings.Layer.Namespace}.{Settings.Layer.TypeName}, {Settings.Layer.Assembly}");
+        [CanBeNull] private readonly Type _layerType = Type.GetType($"{Settings.Layer.Namespace}.{Settings.Layer.TypeName}, {Settings.Layer.Assembly}");
 
         /// <summary>Type name for layer masks.</summary>
         private readonly string _maskTypeName = $"{Settings.Layer.TypeName}Masks";
@@ -76,6 +77,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <returns>True if they are the <see cref="_layerType" /> enum and project layers match.</returns>
         private bool HasChangedLayers()
         {
+            Assert.IsNotNull(_inUnity);
             _inUnity.Clear();
 
             foreach (string layer in InternalEditorUtility.layers)
@@ -86,8 +88,10 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
                 _inUnity.Add(new ValueTuple<string, int>(layerName, layerValue));
             }
 
+            Assert.IsNotNull(_inEnum);
             _inEnum.Clear();
 
+            Assert.IsNotNull(_layerType);
             foreach (int enumValue in Enum.GetValues(_layerType))
                 _inEnum.Add(new ValueTuple<string, int>(Enum.GetName(_layerType, enumValue), enumValue));
 
@@ -209,7 +213,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
                 // LayerMasks enum
                 field = new CodeMemberField(_maskTypeName, layerName)
                 {
-                    InitExpression = new CodePrimitiveExpression(1 << layerValue)
+                    InitExpression = new CodePrimitiveExpression(LayerMask.GetMask(layerName))
                 };
                 ValidateIdentifier(field, layer);
                 layerMasksEnum.Members.Add(field);

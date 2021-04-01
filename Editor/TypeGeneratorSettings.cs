@@ -25,7 +25,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         private const string DefaultLayerFilePath = "Scripts/Layer.cs";
 
         /// <summary>Where to create a new <see cref="TypeGeneratorSettings" /> asset.</summary>
-        private const string DefaultSettingsAssetPath = "Assets/TagGeneratorSettings.asset";
+        private const string DefaultSettingsAssetPath = "Assets/TypeGeneratorSettings.asset";
 
         /// <summary>Where to start the asset search for settings.</summary>
         private static readonly string[] SearchInFolders = {"Assets"};
@@ -41,19 +41,17 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         {
             Tag = new Settings
             {
-                Namespace = Application.productName.Replace(" ", Empty),
                 TypeName = DefaultTagTypeName,
-                FilePath = DefaultTagFilePath,
-                AssemblyDefinition = null
+                FilePath = DefaultTagFilePath
             };
 
             Layer = new Settings
             {
-                Namespace = Application.productName.Replace(" ", Empty),
                 TypeName = DefaultLayerTypeName,
-                FilePath = DefaultLayerFilePath,
-                AssemblyDefinition = null
+                FilePath = DefaultLayerFilePath
             };
+
+            Tag.Namespace = Layer.Namespace = Application.productName.Replace(" ", Empty);
         }
 
         /// <summary>This function is called when the script is loaded or a value is changed in the Inspector (Called in the editor only).</summary>
@@ -61,10 +59,10 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         {
             Assert.IsNotNull(Tag);
             Assert.IsNotNull(Layer);
-            Assert.IsTrue(!IsNullOrWhiteSpace(Tag.TypeName));
-            Assert.IsTrue(!IsNullOrWhiteSpace(Tag.FilePath));
-            Assert.IsTrue(!IsNullOrWhiteSpace(Layer.TypeName));
-            Assert.IsTrue(!IsNullOrWhiteSpace(Layer.FilePath));
+            Assert.IsTrue(!IsNullOrWhiteSpace(Tag.TypeName), "Tag type cannot be empty.");
+            Assert.IsTrue(!IsNullOrWhiteSpace(Tag.FilePath), "Tag path cannot be empty.");
+            Assert.IsTrue(!IsNullOrWhiteSpace(Layer.TypeName), "Layer type cannot be empty.");
+            Assert.IsTrue(!IsNullOrWhiteSpace(Layer.FilePath), "Layer path cannot be empty.");
         }
 
         /// <summary>Returns <see cref="InvalidOperationException" /> or creates a new one and saves the asset.</summary>
@@ -73,6 +71,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         [NotNull]
         internal static TypeGeneratorSettings GetOrCreateSettings()
         {
+            Assert.IsNotNull(SearchInFolders);
             string[] guids = AssetDatabase.FindAssets($"t:{nameof(TypeGeneratorSettings)}", SearchInFolders);
 
             TypeGeneratorSettings settings;

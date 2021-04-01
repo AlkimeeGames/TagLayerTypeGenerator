@@ -1,7 +1,7 @@
 {
   "name": "com.alkimeegames.taglayertypegenerator",
   "displayName": "Tag & Layer Type Generator",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "unity": "2018.4",
   "description": "Automatically generate statically typed Tags and Layers for Unity Projects.",
   "keywords": [
