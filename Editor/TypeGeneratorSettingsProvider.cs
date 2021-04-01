@@ -1,7 +1,13 @@
 ﻿using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
+#if UNITY_2019_1_OR_NEWER
 using UnityEngine.UIElements;
+
+#else
+using UnityEngine.Experimental.UIElements;
+#endif
+
 
 namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 {
@@ -60,7 +66,9 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
             if (GUILayout.Button("Regenerate Layer Type File")) LayerTypeGenerator.Generator.GenerateFile();
             EditorGUI.EndDisabledGroup();
 
-            if (GUILayout.Button("Locate Settings Asset")) Selection.SetActiveObjectWithContext(_tagGeneratorSettings.targetObject, _tagGeneratorSettings.context);
+            EditorGUILayout.LabelField("Open", EditorStyles.boldLabel);
+            if (GUILayout.Button("Settings Asset")) Selection.SetActiveObjectWithContext(_tagGeneratorSettings.targetObject, _tagGeneratorSettings.context);
+            if (GUILayout.Button("Tags and Layers")) SettingsService.OpenProjectSettings("Project/Tags and Layers");
 
             _tagGeneratorSettings.ApplyModifiedPropertiesWithoutUndo();
         }
@@ -76,7 +84,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
             };
 
         /// <summary>Styles for the <see cref="SettingsProvider" />.</summary>
-        private readonly struct Styles
+        private /*readonly*/ struct Styles
         {
             public static readonly GUIContent AutoGenerate = new GUIContent("Auto Generate");
             public static readonly GUIContent TypeName = new GUIContent("Type Name");

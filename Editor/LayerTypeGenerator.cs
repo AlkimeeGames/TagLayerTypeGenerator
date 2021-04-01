@@ -7,7 +7,6 @@ using System.Reflection;
 using JetBrains.Annotations;
 using Microsoft.CSharp;
 using UnityEditor;
-using UnityEditor.Experimental.GraphView;
 using UnityEditorInternal;
 using UnityEngine;
 using static System.String;
@@ -18,10 +17,10 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
     public sealed class LayerTypeGenerator : TypeGenerator<LayerTypeGenerator>
     {
         /// <summary>Used to check if what layer strings and IDs are in the Layer Enum.</summary>
-        private readonly HashSet<(string, int)> _inEnum = new HashSet<(string, int)>();
+        private readonly HashSet<ValueTuple<string, int>> _inEnum = new HashSet<ValueTuple<string, int>>();
 
         /// <summary>Used to check if what layer strings and IDs are in the project.</summary>
-        private readonly HashSet<(string, int)> _inUnity = new HashSet<(string, int)>();
+        private readonly HashSet<ValueTuple<string, int>> _inUnity = new HashSet<ValueTuple<string, int>>();
 
         /// <summary>The absolute path to the file containing the Enums.</summary>
         private readonly string _layerFilePath = $"{Application.dataPath}/{Settings.Layer.FilePath}";
@@ -74,7 +73,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 
         /// <summary>Checks if the values defined in the Enum are the same as in Unity itself.</summary>
         /// <remarks>The checks are performed against the layer name and the layer ID. This should catch renames.</remarks>
-        /// <returns>True if they are the <see cref="GraphView.Layer" /> enum and project layers match.</returns>
+        /// <returns>True if they are the <see cref="_layerType" /> enum and project layers match.</returns>
         private bool HasChangedLayers()
         {
             _inUnity.Clear();
@@ -84,13 +83,13 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
                 string layerName = layer.Replace(" ", Empty);
                 int layerValue = LayerMask.NameToLayer(layer);
 
-                _inUnity.Add((layerName, layerValue));
+                _inUnity.Add(new ValueTuple<string, int>(layerName, layerValue));
             }
 
             _inEnum.Clear();
 
             foreach (int enumValue in Enum.GetValues(_layerType))
-                _inEnum.Add((Enum.GetName(_layerType, enumValue), enumValue));
+                _inEnum.Add(new ValueTuple<string, int>(Enum.GetName(_layerType, enumValue), enumValue));
 
             return !_inEnum.SetEquals(_inUnity);
         }
@@ -141,19 +140,22 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
             codeNamespace.Types.Add(layerMasksEnum);
 
             // With a StringWriter and a CSharpCodeProvider; generate the code.
-            using var stringWriter = new StringWriter();
-            using var codeProvider = new CSharpCodeProvider();
-            codeProvider.GenerateCodeFromCompileUnit(compileUnit, stringWriter, new CodeGeneratorOptions
+            using (var stringWriter = new StringWriter())
             {
-                BracingStyle = "C",
-                BlankLinesBetweenMembers = false
-            });
+                using (var codeProvider = new CSharpCodeProvider())
+                    codeProvider.GenerateCodeFromCompileUnit(compileUnit, stringWriter, new CodeGeneratorOptions
+                    {
+                        BracingStyle = "C",
+                        BlankLinesBetweenMembers = false
+                    });
 
-            // Create the asset path if it doesn't already exist.
-            CreateAssetPathIfNotExists(_layerFilePath);
+                // Create the asset path if it doesn't already exist.
+                CreateAssetPathIfNotExists(_layerFilePath);
 
-            // Write the code to the file system and refresh the AssetDatabase.
-            File.WriteAllText(_layerFilePath, stringWriter.ToString());
+                // Write the code to the file system and refresh the AssetDatabase.
+                File.WriteAllText(_layerFilePath, stringWriter.ToString());
+            }
+
             AssetDatabase.Refresh();
 
             InvokeOnFileGeneration();

@@ -18,7 +18,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         [PublicAPI] public static ITypeGenerator Generator => Instance;
 
         /// <summary>Invoked when the layer file is generated.</summary>
-        [PublicAPI] public event UnityAction OnFileGeneration;
+        public event UnityAction OnFileGeneration;
 
         /// <inheritdoc />
         public abstract void GenerateFile();
@@ -65,6 +65,6 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         private static TypeGeneratorSettings _settings;
 
         /// <summary>The <see cref="TypeGeneratorSettings" /> to use when generating files.</summary>
-        [NotNull] protected static TypeGeneratorSettings Settings => _settings ??= TypeGeneratorSettings.GetOrCreateSettings();
+        [NotNull] protected static TypeGeneratorSettings Settings => _settings ? _settings : _settings = TypeGeneratorSettings.GetOrCreateSettings();
     }
 }

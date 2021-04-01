@@ -1,18 +1,18 @@
 {
   "name": "com.alkimeegames.taglayertypegenerator",
-  "displayName": "Alkimee Games - Tag & Layer Type Generator",
-  "version": "1.0.0",
-  "unity": "2018.1",
+  "displayName": "Tag & Layer Type Generator",
+  "version": "1.0.1",
+  "unity": "2018.4",
   "description": "Automatically generate statically typed Tags and Layers for Unity Projects.",
   "keywords": [
     "utils"
   ],
   "type": "tool",
   "hideInEditor": false,
-  "unityRelease": "0f2",
+  "unityRelease": "33f1",
   "author": {
-    "name": "Andrew Menino-Barlow (Alkimee Games)",
+    "name": "Andrew Menino-Barlow",
     "email": "hello@alkimee.net",
-    "url": "https://github.com/Alkimee"
+    "url": "https://github.com/AlkimeeGames"
   }
 }

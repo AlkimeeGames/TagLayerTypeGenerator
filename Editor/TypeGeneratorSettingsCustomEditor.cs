@@ -3,9 +3,11 @@ using UnityEngine;
 
 namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 {
+    /// <summary>Custom inspector for <see cref="TypeGeneratorSettings" />.</summary>
     [CustomEditor(typeof(TypeGeneratorSettings))]
-    internal sealed class TypeGeneratorSettingsGUI : UnityEditor.Editor
+    internal sealed class TypeGeneratorSettingsCustomEditor : UnityEditor.Editor
     {
+        /// <inheritdoc />
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
@@ -21,7 +23,9 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
             if (GUILayout.Button("Regenerate Layer Type File")) LayerTypeGenerator.Generator.GenerateFile();
             EditorGUI.EndDisabledGroup();
 
-            if (GUILayout.Button("Open Project Settings")) SettingsService.OpenProjectSettings(TypeGeneratorSettingsProvider.ProjectSettingPath);
+            EditorGUILayout.LabelField("Open", EditorStyles.boldLabel);
+            if (GUILayout.Button("Project Settings")) SettingsService.OpenProjectSettings(TypeGeneratorSettingsProvider.ProjectSettingPath);
+            if (GUILayout.Button("Tags and Layers")) SettingsService.OpenProjectSettings("Project/Tags and Layers");
         }
     }
 }

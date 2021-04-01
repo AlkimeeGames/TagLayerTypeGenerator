@@ -1,9 +1,6 @@
 {
     "name": "AlkimeeGames.TagLayerTypeGenerator.Editor",
     "rootNamespace": "AlkimeeGames.TagLayerTypeGenerator.Editor",
-    "references": [
-        "AlkimeeGames.TagLayerClassGenerator"
-    ],
     "includePlatforms": [
         "Editor"
     ],

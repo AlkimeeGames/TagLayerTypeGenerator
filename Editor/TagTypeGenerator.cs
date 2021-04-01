@@ -118,19 +118,23 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
             codeNamespace.Types.Add(typeDeclaration);
 
             // With a StringWriter and a CSharpCodeProvider; generate the code.
-            using var stringWriter = new StringWriter();
-            using var codeProvider = new CSharpCodeProvider();
-            codeProvider.GenerateCodeFromCompileUnit(compileUnit, stringWriter, new CodeGeneratorOptions
+
+            using (var stringWriter = new StringWriter())
             {
-                BracingStyle = "C",
-                BlankLinesBetweenMembers = false
-            });
+                using (var codeProvider = new CSharpCodeProvider())
+                    codeProvider.GenerateCodeFromCompileUnit(compileUnit, stringWriter, new CodeGeneratorOptions
+                    {
+                        BracingStyle = "C",
+                        BlankLinesBetweenMembers = false
+                    });
 
-            // Create the asset path if it doesn't already exist.
-            CreateAssetPathIfNotExists(_tagFilePath);
+                // Create the asset path if it doesn't already exist.
+                CreateAssetPathIfNotExists(_tagFilePath);
 
-            // Write the code to the file system and refresh the AssetDatabase.
-            File.WriteAllText(_tagFilePath, stringWriter.ToString());
+                // Write the code to the file system and refresh the AssetDatabase.
+                File.WriteAllText(_tagFilePath, stringWriter.ToString());
+            }
+
             AssetDatabase.Refresh();
 
             InvokeOnFileGeneration();
