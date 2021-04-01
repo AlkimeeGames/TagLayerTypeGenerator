@@ -1,11 +1,24 @@
 # Tag / Layer Type Generator
 
-## What is Tag / Layer Type Generator?
+## What is the Tag / Layer Type Generator?
 
-The Tag / Layer Type Generator automatically generates types / classes of the
+The Tag / Layer Type Generator automatically generates types / classes for the
 [tags and layers](https://docs.unity3d.com/Manual/class-TagManager.html) defined in your Unity project. A developer can then use these types to ensure that at compile-time, any
 tags or layers used during runtime will be statically typed. Using tags and layers in this way ensures that should a tag be changed or a layer ID updated, the .NET compiler will
-flag this as a compilation error long before bugs appear at runtime when using "[magic strings](https://en.wikipedia.org/wiki/Magic_string)".
+flag this as a compilation error long before bugs appear at runtime, which is often a symptom of using so-called '[magic strings](https://en.wikipedia.org/wiki/Magic_string)'.
+
+## Why use strongly typed Tags or Layers?
+
+Using statically typed tags and layers in your projects code provides compile-time checking of the tag and layer values. However, that's not the only advantage. For example, you
+can use the generated LayerMasks enum as a property of any MonoBehaviour or ScriptableObject, allowing you to specify multiple Layers as a property of your gameObject. This can be
+useful if you want to define in the editor what layers to check a collision or raycast against (or anywhere that Unity accepts
+a [LayerMask](https://docs.unity3d.com/ScriptReference/LayerMask.html)).
+
+## Whats wrong with [UnityEngine.LayerMask](https://docs.unity3d.com/ScriptReference/LayerMask.html)?
+
+Unity's LayerMask struct provides methods for converting a layer name as a *string* into its corresponding Layer ID or LayerMask bitmask. However, this requires you specify the
+string name in your code which is prone to causing errors at runtime should a layer name be changed. You could mitigate this by defining a class with the LayerNames as strings and
+refer to that in your code, but then you lose the benefit of being able to reference the LayerMasks Enum as a property of your MonoBehaviours or ScriptableObjects.
 
 ## Setup
 
@@ -18,6 +31,69 @@ The Tag / Layer Type generator subscribes to the Unity Editor's
 [ProjectChanged](https://docs.unity3d.com/ScriptReference/EditorApplication-projectChanged.html) event. When this event is raised, the generators check to see if any new tags or
 layers have been added or previous tags or layers have been updated. A new CSharp file is generated in either case. It's also possible to manually generate the files either via a
 button in the Project Settings windows or inspecting the TagLayerSettings asset.
+
+## Example Usages
+
+### Tags
+
+```c#
+public sealed class Bullet : MonoBehaviour
+{
+    private void OnCollisionEnter([Collision other)
+    {
+        if (other.gameObject.CompareTag(Tag.Player)) {
+            Destroy(other.gameObject);
+        }
+    }
+ }
+```
+
+### Layer
+
+```c#
+public sealed class IgnoresRayCast : MonoBehaviour
+{
+    private void Awake()
+    {
+        gameObject.layer = (int) Layer.IgnoreRaycast;
+    }
+ }
+```
+
+### Layer Masks
+
+#### As property of GameObjects
+
+```c#
+public sealed class Bullet : MonoBehaviour
+{
+    /// Set which layers you want a bullet to collide with. The inspector will show a multi-select dropdown of the layers in your project.
+    [SerializedField] private LayerMasks _collideAgainst;
+
+    private void FixedUpdate()
+    {
+        if (Physics.Raycast(transform.position, transform.forward, 20.0f, (int) _collideAgainst))
+        {
+            OnCollision();
+        }
+    }
+ }
+```
+
+#### Used for assignment
+
+```c#
+public class ExampleClass : MonoBehaviour
+{
+    [SerializedField] private Camera _mainCamera;
+
+    void Start()
+    {
+        // Only render objects in the first layer (Default layer)
+        _mainCamera.cullingMask = (int) Layer.Default;
+    }
+}
+```
 
 ## Configuration
 
@@ -45,7 +121,10 @@ when generating a file. One is the layer ID which is used in Unity to identify a
 during checks. Due to the usage of the
 [Flags](https://docs.microsoft.com/en-us/dotnet/api/system.flagsattribute?view=netstandard-2.0) attribute, it becomes very straight forward to check for multiple layers
 in [Physics.Raycast](https://docs.unity3d.com/ScriptReference/Physics.Raycast.html)
-calls, for example.
+calls (for example) and can be used as a property in the inspector.
+
+The only downside to using Enum's for Layers is the required explicit cast of the Enum to an int. This has little-to-no performance impact on your
+project whilst gaining all the benefits of the compile-time error checking.
 
 ## API and Extensibility
 
@@ -91,7 +170,7 @@ entry to re-resolve the package.
       }
     }
 
-### Examples Of Generated Files
+## Examples Of Generated Files
 
 #### Tags
 
