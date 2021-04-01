@@ -41,21 +41,10 @@ public sealed class Bullet : MonoBehaviour
 {
     private void OnCollisionEnter([Collision other)
     {
+        // Used in CampareTag.
         if (other.gameObject.CompareTag(Tag.Player)) {
             Destroy(other.gameObject);
         }
-    }
- }
-```
-
-### Layer
-
-```c#
-public sealed class IgnoresRayCast : MonoBehaviour
-{
-    private void Awake()
-    {
-        gameObject.layer = (int) Layer.IgnoreRaycast;
     }
  }
 ```
@@ -67,7 +56,7 @@ public sealed class IgnoresRayCast : MonoBehaviour
 ```c#
 public sealed class Bullet : MonoBehaviour
 {
-    /// Set which layers you want a bullet to collide with. The inspector will show a multi-select dropdown of the layers in your project.
+    /// Set which layers you want to collide with. The inspector will show a multi-select dropdown of the layers in your project.
     [SerializedField] private LayerMasks _collideAgainst;
 
     private void FixedUpdate()
@@ -89,7 +78,7 @@ public class ExampleClass : MonoBehaviour
 
     void Start()
     {
-        // Only render objects in the first layer (Default layer)
+        // Only render objects in the default layer.
         _mainCamera.cullingMask = (int) Layer.Default;
     }
 }

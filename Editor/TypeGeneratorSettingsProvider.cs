@@ -15,7 +15,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
     internal sealed class TypeGeneratorSettingsProvider : SettingsProvider
     {
         /// <summary>Path to the Project Settings.</summary>
-        internal const string ProjectSettingPath = "Project/Alkimee/Type Generator Settings";
+        internal const string ProjectSettingPath = "Project/Alkimee Games/Type Generator Settings";
 
         /// <summary><see cref="TypeGeneratorSettings" /> wrapped in a <see cref="SerializedObject" />.</summary>
         private SerializedObject _tagGeneratorSettings;
