@@ -15,7 +15,10 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
     internal sealed class TypeGeneratorSettingsProvider : SettingsProvider
     {
         /// <summary>Path to the Project Settings.</summary>
-        internal const string ProjectSettingPath = "Project/Alkimee Games/Type Generator Settings";
+        internal const string ProjectSettingPath = TagsAndLayersProjectSettings + "/Automatic Type Generation";
+
+        /// <summary>Path to the built-in Tags and Layers Manager.</summary>
+        private const string TagsAndLayersProjectSettings = "Project/Tags and Layers";
 
         /// <summary><see cref="TypeGeneratorSettings" /> wrapped in a <see cref="SerializedObject" />.</summary>
         private SerializedObject _tagGeneratorSettings;
@@ -34,9 +37,11 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
             EditorGUILayout.LabelField(nameof(TypeGeneratorSettings.Tag), EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(_tagGeneratorSettings.FindProperty($"{nameof(TypeGeneratorSettings.Tag)}.{nameof(TypeGeneratorSettings.Tag.AutoGenerate)}"),
                 Styles.AutoGenerate);
-            EditorGUILayout.PropertyField(_tagGeneratorSettings.FindProperty($"{nameof(TypeGeneratorSettings.Tag)}.{nameof(TypeGeneratorSettings.Tag.TypeName)}"), Styles.TypeName);
-            EditorGUILayout.PropertyField(_tagGeneratorSettings.FindProperty($"{nameof(TypeGeneratorSettings.Tag)}.{nameof(TypeGeneratorSettings.Tag.FilePath)}"), Styles.FilePath);
-            EditorGUILayout.PropertyField(_tagGeneratorSettings.FindProperty($"{nameof(TypeGeneratorSettings.Tag)}.{nameof(TypeGeneratorSettings.Tag.Namespace)}"),
+            EditorGUILayout.DelayedTextField(_tagGeneratorSettings.FindProperty($"{nameof(TypeGeneratorSettings.Tag)}.{nameof(TypeGeneratorSettings.Tag.TypeName)}"),
+                Styles.TypeName);
+            EditorGUILayout.DelayedTextField(_tagGeneratorSettings.FindProperty($"{nameof(TypeGeneratorSettings.Tag)}.{nameof(TypeGeneratorSettings.Tag.FilePath)}"),
+                Styles.FilePath);
+            EditorGUILayout.DelayedTextField(_tagGeneratorSettings.FindProperty($"{nameof(TypeGeneratorSettings.Tag)}.{nameof(TypeGeneratorSettings.Tag.Namespace)}"),
                 Styles.Namespace);
             EditorGUILayout.PropertyField(_tagGeneratorSettings.FindProperty($"{nameof(TypeGeneratorSettings.Tag)}.{nameof(TypeGeneratorSettings.Tag.AssemblyDefinition)}"),
                 Styles.AssemblyDefinition);
@@ -46,11 +51,11 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
             EditorGUILayout.LabelField(nameof(TypeGeneratorSettings.Layer), EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(_tagGeneratorSettings.FindProperty($"{nameof(TypeGeneratorSettings.Layer)}.{nameof(TypeGeneratorSettings.Layer.AutoGenerate)}"),
                 Styles.AutoGenerate);
-            EditorGUILayout.PropertyField(_tagGeneratorSettings.FindProperty($"{nameof(TypeGeneratorSettings.Layer)}.{nameof(TypeGeneratorSettings.Layer.TypeName)}"),
+            EditorGUILayout.DelayedTextField(_tagGeneratorSettings.FindProperty($"{nameof(TypeGeneratorSettings.Layer)}.{nameof(TypeGeneratorSettings.Layer.TypeName)}"),
                 Styles.TypeName);
-            EditorGUILayout.PropertyField(_tagGeneratorSettings.FindProperty($"{nameof(TypeGeneratorSettings.Layer)}.{nameof(TypeGeneratorSettings.Layer.FilePath)}"),
+            EditorGUILayout.DelayedTextField(_tagGeneratorSettings.FindProperty($"{nameof(TypeGeneratorSettings.Layer)}.{nameof(TypeGeneratorSettings.Layer.FilePath)}"),
                 Styles.FilePath);
-            EditorGUILayout.PropertyField(_tagGeneratorSettings.FindProperty($"{nameof(TypeGeneratorSettings.Layer)}.{nameof(TypeGeneratorSettings.Layer.Namespace)}"),
+            EditorGUILayout.DelayedTextField(_tagGeneratorSettings.FindProperty($"{nameof(TypeGeneratorSettings.Layer)}.{nameof(TypeGeneratorSettings.Layer.Namespace)}"),
                 Styles.Namespace);
             EditorGUILayout.PropertyField(_tagGeneratorSettings.FindProperty($"{nameof(TypeGeneratorSettings.Layer)}.{nameof(TypeGeneratorSettings.Layer.AssemblyDefinition)}"),
                 Styles.AssemblyDefinition);
@@ -68,7 +73,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 
             EditorGUILayout.LabelField("Open", EditorStyles.boldLabel);
             if (GUILayout.Button("Settings Asset")) Selection.SetActiveObjectWithContext(_tagGeneratorSettings.targetObject, _tagGeneratorSettings.context);
-            if (GUILayout.Button("Tags and Layers")) SettingsService.OpenProjectSettings("Project/Tags and Layers");
+            if (GUILayout.Button("Tags and Layers")) SettingsService.OpenProjectSettings(TagsAndLayersProjectSettings);
 
             _tagGeneratorSettings.ApplyModifiedPropertiesWithoutUndo();
         }
@@ -77,11 +82,8 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <returns>The <see cref="SettingsProvider" /> for the Project Settings window.</returns>
         [SettingsProvider]
         [NotNull]
-        private static SettingsProvider CreateTagClassGeneratorSettingsProvider() =>
-            new TypeGeneratorSettingsProvider(ProjectSettingPath, SettingsScope.Project)
-            {
-                keywords = GetSearchKeywordsFromGUIContentProperties<Styles>()
-            };
+        private static SettingsProvider CreateTagClassGeneratorSettingsProvider() => new TypeGeneratorSettingsProvider(ProjectSettingPath, SettingsScope.Project)
+            {keywords = GetSearchKeywordsFromGUIContentProperties<Styles>()};
 
         /// <summary>Styles for the <see cref="SettingsProvider" />.</summary>
         private /*readonly*/ struct Styles

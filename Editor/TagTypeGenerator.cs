@@ -9,6 +9,7 @@ using Microsoft.CSharp;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.Assertions;
 using static System.String;
 
 namespace AlkimeeGames.TagLayerTypeGenerator.Editor
@@ -69,6 +70,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 
             _inClass.Clear();
 
+            Assert.IsNotNull(_tagType);
             FieldInfo[] fields = _tagType.GetFields(BindingFlags.Public | BindingFlags.Static);
             foreach (FieldInfo fieldInfo in fields)
                 if (fieldInfo.IsLiteral)
