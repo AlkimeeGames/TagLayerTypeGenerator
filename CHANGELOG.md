@@ -4,6 +4,10 @@ All notable changes to this package will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2021-04-02
+
+- Validate earlier that settings will not create invalid identifiers in the generated code.
+
 ## [1.0.4] - 2021-04-01
 
 - Moved Project Settings path to 'Project/Tags and Layers/Automatic Type Generation'.
