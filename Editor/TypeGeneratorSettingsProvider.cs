@@ -1,11 +1,12 @@
-﻿#if UNITY_2019_1_OR_NEWER
+﻿using JetBrains.Annotations;
+using UnityEditor;
+using UnityEngine;
+#if UNITY_2019_1_OR_NEWER
 using UnityEngine.UIElements;
+
 #else
 using UnityEngine.Experimental.UIElements;
 #endif
-using JetBrains.Annotations;
-using UnityEditor;
-using UnityEngine;
 
 
 namespace AlkimeeGames.TagLayerTypeGenerator.Editor

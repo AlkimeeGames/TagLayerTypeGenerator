@@ -52,7 +52,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
             if (TagType != null) return true;
 
             if (File.Exists(TagFilePath))
-                Debug.LogWarning($"{Settings.Tag.Namespace}.{Settings.Tag.TypeName} is missing from {Settings.Tag.Assembly}." +
+                Debug.LogWarning($"{Settings.Tag.Namespace}.{Settings.Tag.TypeName} is missing from {Settings.Tag.Assembly}. " +
                                  $"Check correct {nameof(Settings.Tag.AssemblyDefinition)} is set then regenerate via the Project Settings' menu.", Settings);
 
             return false;
@@ -81,9 +81,9 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <returns><see langword="true" /> if all conditions are met.</returns>
         public override bool CanGenerate()
         {
-            if (!CodeGenerator.IsValidLanguageIndependentIdentifier(Settings.Tag.TypeName)) return false;
-            if (!IsNullOrWhiteSpace(Settings.Tag.Namespace) && !CodeGenerator.IsValidLanguageIndependentIdentifier(Settings.Tag.Namespace)) return false;
-            if (IsNullOrWhiteSpace(Settings.Tag.FilePath)) return false;
+            if (!Settings.Tag.IsValidTypeName()) return false;
+            if (!Settings.Tag.IsValidNamespace()) return false;
+            if (!Settings.Tag.IsValidFilePath()) return false;
 
             return true;
         }

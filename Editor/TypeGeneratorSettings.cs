@@ -61,13 +61,13 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <summary>This function is called when the script is loaded or a value is changed in the Inspector (Called in the editor only).</summary>
         private void OnValidate()
         {
-            if (!IsValidLanguageIndependentIdentifier(Tag.TypeName)) Debug.LogErrorFormat(InvalidIdentifierWarning, Tag.TypeName);
-            if (!IsNullOrWhiteSpace(Tag.Namespace) && !IsValidLanguageIndependentIdentifier(Tag.Namespace)) Debug.LogErrorFormat(InvalidIdentifierWarning, Tag.Namespace);
-            if (IsNullOrWhiteSpace(Tag.FilePath) && !IsValidLanguageIndependentIdentifier(Tag.FilePath)) Debug.LogError("Tag path cannot be empty.");
+            if (!Tag.IsValidTypeName()) Debug.LogErrorFormat(InvalidIdentifierWarning, Tag.TypeName);
+            if (!Tag.IsValidNamespace()) Debug.LogErrorFormat(InvalidIdentifierWarning, Tag.Namespace);
+            if (!Tag.IsValidFilePath()) Debug.LogError("Tag path must be a valid path relative to Assets, not an empty string and ends in '.cs'.");
 
-            if (!IsValidLanguageIndependentIdentifier(Layer.TypeName)) Debug.LogErrorFormat(InvalidIdentifierWarning, Layer.TypeName);
-            if (!IsNullOrWhiteSpace(Layer.Namespace) && !IsValidLanguageIndependentIdentifier(Layer.Namespace)) Debug.LogErrorFormat(InvalidIdentifierWarning, Layer.Namespace);
-            if (IsNullOrWhiteSpace(Layer.FilePath) && !IsValidLanguageIndependentIdentifier(Layer.FilePath)) Debug.LogError("Layer path cannot be empty.");
+            if (!Layer.IsValidTypeName()) Debug.LogErrorFormat(InvalidIdentifierWarning, Layer.TypeName);
+            if (!Layer.IsValidNamespace()) Debug.LogErrorFormat(InvalidIdentifierWarning, Layer.Namespace);
+            if (!Layer.IsValidFilePath()) Debug.LogError("Layer path must be a valid path relative to Assets, not an empty string and ends in '.cs'.");
         }
 
         /// <summary>Returns <see cref="InvalidOperationException" /> or creates a new one and saves the asset.</summary>
@@ -145,6 +145,19 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 
             /// <summary>Used via reflection to look for the generated type.</summary>
             [NotNull] internal string Assembly => AssemblyDefinition == null ? "Assembly-CSharp" : AssemblyDefinition.name;
+
+            /// <summary>Splits a namespace by it's "." to validate each part is a validate identifier.</summary>
+            /// <returns>If all parts of the namespace are valid.</returns>
+            internal bool IsValidNamespace() => !IsNullOrWhiteSpace(Namespace) && Namespace.Split('.').All(IsValidLanguageIndependentIdentifier);
+
+            /// <summary>Validates the <see cref="TypeName" /> is a valid identifier.</summary>
+            /// <returns>True if a valid identifier.</returns>
+            internal bool IsValidTypeName() => IsValidLanguageIndependentIdentifier(TypeName);
+
+            /// <summary>Validates the <see cref="FilePath" /> is valid.</summary>
+            /// <returns>True if a valid path.</returns>
+            internal bool IsValidFilePath() =>
+                !IsNullOrWhiteSpace(FilePath) && FilePath.Substring(FilePath.Length - 3) == ".cs" && Uri.IsWellFormedUriString(FilePath, UriKind.Relative);
         }
     }
 }

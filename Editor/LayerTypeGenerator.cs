@@ -66,9 +66,9 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <returns><see langword="true" /> if all conditions are met.</returns>
         public override bool CanGenerate()
         {
-            if (!CodeGenerator.IsValidLanguageIndependentIdentifier(Settings.Layer.TypeName)) return false;
-            if (!IsNullOrWhiteSpace(Settings.Layer.Namespace) && !CodeGenerator.IsValidLanguageIndependentIdentifier(Settings.Layer.Namespace)) return false;
-            if (IsNullOrWhiteSpace(Settings.Layer.FilePath)) return false;
+            if (!Settings.Layer.IsValidTypeName()) return false;
+            if (!Settings.Layer.IsValidNamespace()) return false;
+            if (!Settings.Layer.IsValidFilePath()) return false;
 
             return true;
         }
