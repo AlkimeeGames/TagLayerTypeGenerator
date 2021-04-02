@@ -23,13 +23,13 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         private readonly HashSet<ValueTuple<string, int>> _inUnity = new HashSet<ValueTuple<string, int>>();
 
         /// <summary>The absolute path to the file containing the Enums.</summary>
-        private readonly string _layerFilePath = $"{Application.dataPath}/{Settings.Layer.FilePath}";
+        [NotNull] private static string LayerFilePath => $"{Application.dataPath}/{Settings.Layer.FilePath}";
 
         /// <summary>Used to read the values from the Enum. If we don't use reflection to find the Enums, we tie ourselves to a specific configuration which isn't ideal.</summary>
-        [CanBeNull] private readonly Type _layerType = Type.GetType($"{Settings.Layer.Namespace}.{Settings.Layer.TypeName}, {Settings.Layer.Assembly}");
+        [CanBeNull] private static Type LayerType => Type.GetType($"{Settings.Layer.Namespace}.{Settings.Layer.TypeName}, {Settings.Layer.Assembly}");
 
         /// <summary>Type name for layer masks.</summary>
-        private readonly string _maskTypeName = $"{Settings.Layer.TypeName}Masks";
+        [NotNull] private static string MaskTypeName => $"{Settings.Layer.TypeName}Masks";
 
         /// <summary>Configures the callback for when the editor sends a message the project has changed.</summary>
         [InitializeOnLoadMethod]
@@ -42,10 +42,8 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <summary>If the project has changed, we check if we can generate the file then check if any layers have been updated.</summary>
         private void OnProjectChanged()
         {
-            if (!Settings.Layer.AutoGenerate) return;
-            if (!CanGenerate()) return;
-            if (!TypeExists()) return;
-            if (!HasChangedLayers()) return;
+            if (!Settings.Layer.AutoGenerate || !CanGenerate()) return;
+            if (File.Exists(LayerFilePath) && TypeExists() && !HasChangedLayers()) return;
 
             GenerateFile();
         }
@@ -54,10 +52,13 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <returns>True if the Enum type exists.</returns>
         private bool TypeExists()
         {
-            if (null != _layerType) return true;
+            if (LayerType != null) return true;
 
-            Debug.LogWarning($"{Settings.Layer.Namespace}.{Settings.Layer.TypeName} is missing from {Settings.Layer.Assembly}.\n" +
-                             $"Check correct {nameof(Settings.Layer.AssemblyDefinition)} is set then regenerate via the Project Settings' menu.", Settings);
+            if (File.Exists(LayerFilePath))
+                Debug.LogWarning(
+                    $"{Settings.Layer.Namespace}.{Settings.Layer.TypeName} is missing from {Settings.Layer.Assembly}. " +
+                    $"Check correct {nameof(Settings.Layer.AssemblyDefinition)} is set then regenerate via the Project Settings' menu.", Settings);
+
             return false;
         }
 
@@ -74,7 +75,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 
         /// <summary>Checks if the values defined in the Enum are the same as in Unity itself.</summary>
         /// <remarks>The checks are performed against the layer name and the layer ID. This should catch renames.</remarks>
-        /// <returns>True if they are the <see cref="_layerType" /> enum and project layers match.</returns>
+        /// <returns>True if they are the <see cref="LayerType" /> enum and project layers match.</returns>
         private bool HasChangedLayers()
         {
             _inUnity.Clear();
@@ -89,8 +90,8 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 
             _inEnum.Clear();
 
-            foreach (int enumValue in Enum.GetValues(_layerType))
-                _inEnum.Add(new ValueTuple<string, int>(Enum.GetName(_layerType, enumValue), enumValue));
+            foreach (int enumValue in Enum.GetValues(LayerType))
+                _inEnum.Add(new ValueTuple<string, int>(Enum.GetName(LayerType, enumValue), enumValue));
 
             return !_inEnum.SetEquals(_inUnity);
         }
@@ -117,14 +118,14 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
             // Validate the type name.
             ValidateIdentifier(layersEnum, Settings.Layer.TypeName);
 
-            var layerMasksEnum = new CodeTypeDeclaration(_maskTypeName)
+            var layerMasksEnum = new CodeTypeDeclaration(MaskTypeName)
             {
                 IsEnum = true,
                 TypeAttributes = TypeAttributes.Public
             };
 
             // Validate the type name.
-            ValidateIdentifier(layerMasksEnum, _maskTypeName);
+            ValidateIdentifier(layerMasksEnum, MaskTypeName);
 
             // Put the Flags attribute on the LayerMasks enum to allow us to check multiple layers at once.
             layerMasksEnum.CustomAttributes.Add(new CodeAttributeDeclaration(nameof(FlagsAttribute)));
@@ -151,10 +152,10 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
                     });
 
                 // Create the asset path if it doesn't already exist.
-                CreateAssetPathIfNotExists(_layerFilePath);
+                CreateAssetPathIfNotExists(LayerFilePath);
 
                 // Write the code to the file system and refresh the AssetDatabase.
-                File.WriteAllText(_layerFilePath, stringWriter.ToString());
+                File.WriteAllText(LayerFilePath, stringWriter.ToString());
             }
 
             AssetDatabase.Refresh();
@@ -196,21 +197,20 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         {
             foreach (string layer in InternalEditorUtility.layers)
             {
-                string layerName = layer.Replace(" ", Empty);
-                int layerValue = LayerMask.NameToLayer(layer);
+                string safeName = layer.Replace(" ", Empty);
 
                 // Layer ID enum
-                var field = new CodeMemberField(Settings.Layer.TypeName, layerName)
+                var field = new CodeMemberField(Settings.Layer.TypeName, safeName)
                 {
-                    InitExpression = new CodePrimitiveExpression(layerValue)
+                    InitExpression = new CodePrimitiveExpression(LayerMask.NameToLayer(layer))
                 };
                 ValidateIdentifier(field, layer);
                 layersEnum.Members.Add(field);
 
                 // LayerMasks enum
-                field = new CodeMemberField(_maskTypeName, layerName)
+                field = new CodeMemberField(MaskTypeName, safeName)
                 {
-                    InitExpression = new CodePrimitiveExpression(LayerMask.GetMask(layerName))
+                    InitExpression = new CodePrimitiveExpression(LayerMask.GetMask(layer))
                 };
                 ValidateIdentifier(field, layer);
                 layerMasksEnum.Members.Add(field);

@@ -23,10 +23,10 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         private readonly HashSet<string> _inUnity = new HashSet<string>();
 
         /// <summary>The absolute path to the file containing the tags.</summary>
-        [NotNull] private readonly string _tagFilePath = $"{Application.dataPath}/{Settings.Tag.FilePath}";
+        [NotNull] private static string TagFilePath => $"{Application.dataPath}/{Settings.Tag.FilePath}";
 
         /// <summary>Used to read the values from the Class. If we don't use reflection to find the Class, we tie ourselves to a specific configuration which isn't ideal.</summary>
-        [CanBeNull] private readonly Type _tagType = Type.GetType($"{Settings.Tag.Namespace}.{Settings.Tag.TypeName}, {Settings.Tag.Assembly}");
+        [CanBeNull] private static Type TagType => Type.GetType($"{Settings.Tag.Namespace}.{Settings.Tag.TypeName}, {Settings.Tag.Assembly}");
 
         /// <summary>Configures the callback for when the editor sends a message the project has changed.</summary>
         [InitializeOnLoadMethod]
@@ -39,10 +39,8 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <summary>If the project has changed, check if I can generate the file and if any tags have been updated.</summary>
         private void OnProjectChanged()
         {
-            if (!Settings.Tag.AutoGenerate) return;
-            if (!CanGenerate()) return;
-            if (!TypeExists()) return;
-            if (!HasChangedTags()) return;
+            if (!Settings.Layer.AutoGenerate || !CanGenerate()) return;
+            if (File.Exists(TagFilePath) && TypeExists() && !HasChangedTags()) return;
 
             GenerateFile();
         }
@@ -51,10 +49,12 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <returns>True if the type exists.</returns>
         private bool TypeExists()
         {
-            if (null != _tagType) return true;
+            if (TagType != null) return true;
 
-            Debug.LogWarning($"{Settings.Tag.Namespace}.{Settings.Tag.TypeName} is missing from {Settings.Tag.Assembly}." +
-                             $"Check correct {nameof(Settings.Tag.AssemblyDefinition)} is set then regenerate via the Project Settings' menu.", Settings);
+            if (File.Exists(TagFilePath))
+                Debug.LogWarning($"{Settings.Tag.Namespace}.{Settings.Tag.TypeName} is missing from {Settings.Tag.Assembly}." +
+                                 $"Check correct {nameof(Settings.Tag.AssemblyDefinition)} is set then regenerate via the Project Settings' menu.", Settings);
+
             return false;
         }
 
@@ -69,7 +69,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 
             _inClass.Clear();
 
-            FieldInfo[] fields = _tagType.GetFields(BindingFlags.Public | BindingFlags.Static);
+            FieldInfo[] fields = TagType.GetFields(BindingFlags.Public | BindingFlags.Static);
             foreach (FieldInfo fieldInfo in fields)
                 if (fieldInfo.IsLiteral)
                     _inClass.Add(fieldInfo.Name);
@@ -130,10 +130,10 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
                     });
 
                 // Create the asset path if it doesn't already exist.
-                CreateAssetPathIfNotExists(_tagFilePath);
+                CreateAssetPathIfNotExists(TagFilePath);
 
                 // Write the code to the file system and refresh the AssetDatabase.
-                File.WriteAllText(_tagFilePath, stringWriter.ToString());
+                File.WriteAllText(TagFilePath, stringWriter.ToString());
             }
 
             AssetDatabase.Refresh();
