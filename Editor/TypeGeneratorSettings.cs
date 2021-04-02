@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.Assertions;
+using static System.CodeDom.Compiler.CodeGenerator;
 using static System.String;
 
 namespace AlkimeeGames.TagLayerTypeGenerator.Editor
@@ -26,6 +26,10 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 
         /// <summary>Where to create a new <see cref="TypeGeneratorSettings" /> asset.</summary>
         private const string DefaultSettingsAssetPath = "Assets/TypeGeneratorSettings.asset";
+
+        /// <summary>Log errors about invalidate identifiers with this string.</summary>
+        private const string InvalidIdentifierWarning =
+            "'{0}' is not a valid identifier. See <a href=\"https://bit.ly/IdentifierNames\">https://bit.ly/IdentifierNames</a> for details.";
 
         /// <summary>Where to start the asset search for settings.</summary>
         private static readonly string[] SearchInFolders = {"Assets"};
@@ -57,12 +61,13 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <summary>This function is called when the script is loaded or a value is changed in the Inspector (Called in the editor only).</summary>
         private void OnValidate()
         {
-            Assert.IsNotNull(Tag);
-            Assert.IsNotNull(Layer);
-            Assert.IsTrue(!IsNullOrWhiteSpace(Tag.TypeName), "Tag type cannot be empty.");
-            Assert.IsTrue(!IsNullOrWhiteSpace(Tag.FilePath), "Tag path cannot be empty.");
-            Assert.IsTrue(!IsNullOrWhiteSpace(Layer.TypeName), "Layer type cannot be empty.");
-            Assert.IsTrue(!IsNullOrWhiteSpace(Layer.FilePath), "Layer path cannot be empty.");
+            if (!IsValidLanguageIndependentIdentifier(Tag.TypeName)) Debug.LogErrorFormat(InvalidIdentifierWarning, Tag.TypeName);
+            if (!IsNullOrWhiteSpace(Tag.Namespace) && !IsValidLanguageIndependentIdentifier(Tag.Namespace)) Debug.LogErrorFormat(InvalidIdentifierWarning, Tag.Namespace);
+            if (IsNullOrWhiteSpace(Tag.FilePath) && !IsValidLanguageIndependentIdentifier(Tag.FilePath)) Debug.LogError("Tag path cannot be empty.");
+
+            if (!IsValidLanguageIndependentIdentifier(Layer.TypeName)) Debug.LogErrorFormat(InvalidIdentifierWarning, Layer.TypeName);
+            if (!IsNullOrWhiteSpace(Layer.Namespace) && !IsValidLanguageIndependentIdentifier(Layer.Namespace)) Debug.LogErrorFormat(InvalidIdentifierWarning, Layer.Namespace);
+            if (IsNullOrWhiteSpace(Layer.FilePath) && !IsValidLanguageIndependentIdentifier(Layer.FilePath)) Debug.LogError("Layer path cannot be empty.");
         }
 
         /// <summary>Returns <see cref="InvalidOperationException" /> or creates a new one and saves the asset.</summary>
@@ -71,12 +76,10 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         [NotNull]
         internal static TypeGeneratorSettings GetOrCreateSettings()
         {
-            Assert.IsNotNull(SearchInFolders);
             string[] guids = AssetDatabase.FindAssets($"t:{nameof(TypeGeneratorSettings)}", SearchInFolders);
 
             TypeGeneratorSettings settings;
 
-            Assert.IsNotNull(guids);
             switch (guids.Length)
             {
                 case 0:
@@ -90,7 +93,6 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
                                                         $"Found: {Join(", ", guids.Select(AssetDatabase.GUIDToAssetPath))}.");
             }
 
-            Assert.IsNotNull(settings);
             return settings;
         }
 
@@ -99,10 +101,8 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <param name="settings">The loaded <see cref="TypeGeneratorSettings" />.</param>
         private static void LoadSettings([NotNull] string guid, out TypeGeneratorSettings settings)
         {
-            Assert.IsNotNull(guid);
             string path = AssetDatabase.GUIDToAssetPath(guid);
 
-            Assert.IsNotNull(path);
             settings = AssetDatabase.LoadAssetAtPath<TypeGeneratorSettings>(path);
         }
 
@@ -128,15 +128,15 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
             internal bool AutoGenerate = true;
 
             /// <summary>The name of the type to generate.</summary>
-            [SerializeField] [Tooltip("Name of the type to generate.")]
+            [SerializeField] [DelayedAttribute] [Tooltip("Name of the type to generate.")]
             internal string TypeName;
 
             /// <summary>The path relative to the project's asset folder.</summary>
-            [SerializeField] [Tooltip("Location in project assets to store the generated file.")]
+            [SerializeField] [DelayedAttribute] [Tooltip("Location in project assets to store the generated file.")]
             internal string FilePath;
 
             /// <summary>Optional namespace to put the type in. Can be '<see langword="null" />' or empty..</summary>
-            [Header("Optional")] [CanBeNull] [SerializeField] [Tooltip("Optional: Namespace for the type to reside.")]
+            [Header("Optional")] [DelayedAttribute] [CanBeNull] [SerializeField] [Tooltip("Optional: Namespace for the type to reside.")]
             internal string Namespace;
 
             /// <summary>Backing field for <see cref="Assembly" />.</summary>

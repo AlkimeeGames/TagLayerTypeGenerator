@@ -9,7 +9,6 @@ using Microsoft.CSharp;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.Assertions;
 using static System.String;
 
 namespace AlkimeeGames.TagLayerTypeGenerator.Editor
@@ -66,7 +65,8 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <returns><see langword="true" /> if all conditions are met.</returns>
         public override bool CanGenerate()
         {
-            if (IsNullOrWhiteSpace(Settings.Layer.TypeName)) return false;
+            if (!CodeGenerator.IsValidLanguageIndependentIdentifier(Settings.Layer.TypeName)) return false;
+            if (!IsNullOrWhiteSpace(Settings.Layer.Namespace) && !CodeGenerator.IsValidLanguageIndependentIdentifier(Settings.Layer.Namespace)) return false;
             if (IsNullOrWhiteSpace(Settings.Layer.FilePath)) return false;
 
             return true;
@@ -77,7 +77,6 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <returns>True if they are the <see cref="_layerType" /> enum and project layers match.</returns>
         private bool HasChangedLayers()
         {
-            Assert.IsNotNull(_inUnity);
             _inUnity.Clear();
 
             foreach (string layer in InternalEditorUtility.layers)
@@ -88,10 +87,8 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
                 _inUnity.Add(new ValueTuple<string, int>(layerName, layerValue));
             }
 
-            Assert.IsNotNull(_inEnum);
             _inEnum.Clear();
 
-            Assert.IsNotNull(_layerType);
             foreach (int enumValue in Enum.GetValues(_layerType))
                 _inEnum.Add(new ValueTuple<string, int>(Enum.GetName(_layerType, enumValue), enumValue));
 

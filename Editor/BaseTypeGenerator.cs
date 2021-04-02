@@ -1,4 +1,8 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using System.CodeDom;
+using System.CodeDom.Compiler;
+using JetBrains.Annotations;
+using UnityEngine;
 
 namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 {
@@ -9,6 +13,23 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         private static TypeGeneratorSettings _settings;
 
         /// <summary>The <see cref="TypeGeneratorSettings" /> to use when generating files.</summary>
-        [NotNull] protected static TypeGeneratorSettings Settings => _settings ? _settings : _settings = TypeGeneratorSettings.GetOrCreateSettings();
+        [NotNull]
+        protected static TypeGeneratorSettings Settings => _settings ? _settings : _settings = TypeGeneratorSettings.GetOrCreateSettings();
+
+        /// <summary>Validates a given field.</summary>
+        /// <param name="field">The member field to validate.</param>
+        /// <param name="identifier">The identifier we're creating a member for.</param>
+        protected static void ValidateIdentifier([NotNull] CodeObject field, string identifier)
+        {
+            try
+            {
+                CodeGenerator.ValidateIdentifiers(field);
+            }
+            catch (ArgumentException)
+            {
+                Debug.LogError($"'{identifier}' is not a valid identifier. See <a href=\"https://bit.ly/IdentifierNames\">https://bit.ly/IdentifierNames</a> for details.");
+                throw;
+            }
+        }
     }
 }

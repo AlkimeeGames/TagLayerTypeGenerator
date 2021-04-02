@@ -9,7 +9,6 @@ using Microsoft.CSharp;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.Assertions;
 using static System.String;
 
 namespace AlkimeeGames.TagLayerTypeGenerator.Editor
@@ -70,7 +69,6 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 
             _inClass.Clear();
 
-            Assert.IsNotNull(_tagType);
             FieldInfo[] fields = _tagType.GetFields(BindingFlags.Public | BindingFlags.Static);
             foreach (FieldInfo fieldInfo in fields)
                 if (fieldInfo.IsLiteral)
@@ -83,7 +81,8 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <returns><see langword="true" /> if all conditions are met.</returns>
         public override bool CanGenerate()
         {
-            if (IsNullOrWhiteSpace(Settings.Tag.TypeName)) return false;
+            if (!CodeGenerator.IsValidLanguageIndependentIdentifier(Settings.Tag.TypeName)) return false;
+            if (!IsNullOrWhiteSpace(Settings.Tag.Namespace) && !CodeGenerator.IsValidLanguageIndependentIdentifier(Settings.Tag.Namespace)) return false;
             if (IsNullOrWhiteSpace(Settings.Tag.FilePath)) return false;
 
             return true;
