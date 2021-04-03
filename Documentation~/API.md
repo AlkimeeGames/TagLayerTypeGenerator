@@ -4,9 +4,8 @@ The public API for the Tag and Layer Generators is very straightforward.
 
 ## OnFileGeneration Event
 
-You can subscribe to the FileGeneration event from either TagTypeGenerator.Generator.FileGeneration or LayerTypeGenerator.Generator.FileGeneration from an Editor script. This
-event is invoked immediately after the new type file has been stored to the Asset Database. One use of this might be to add further code to the script after the initial type
-generation.
+You can subscribe to the FileGeneration event from either TagTypeGenerator.Generator.FileGenerated or LayerTypeGenerator.Generator.FileGenerated from any Editor script. This
+event is invoked immediately after the new type file has been stored in the Asset Database. One use of this might be to add further code to the script after the initial generation.
 
 ```c#
 public sealed class MyEditorScript
