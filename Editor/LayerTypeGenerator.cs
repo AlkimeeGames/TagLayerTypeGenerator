@@ -13,23 +13,20 @@ using static System.String;
 
 namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 {
-    /// <summary>Generates a pair of <see langword="enum" />s which contain the layer IDs and corresponding layer masks.</summary>
+    /// <summary>Generates a file containing a type; which contains constant int definitions for each Layer in the project.</summary>
     public sealed class LayerTypeGenerator : TypeGenerator<LayerTypeGenerator>
     {
-        /// <summary>Used to check if what layer strings and IDs are in the Layer Enum.</summary>
-        private readonly HashSet<ValueTuple<string, int>> _inEnum = new HashSet<ValueTuple<string, int>>();
+        /// <summary>Used to check if what layer strings and IDs are in the Layer type.</summary>
+        private readonly HashSet<ValueTuple<string, int>> _inType = new HashSet<ValueTuple<string, int>>();
 
         /// <summary>Used to check if what layer strings and IDs are in the project.</summary>
         private readonly HashSet<ValueTuple<string, int>> _inUnity = new HashSet<ValueTuple<string, int>>();
 
-        /// <summary>The absolute path to the file containing the Enums.</summary>
+        /// <summary>The absolute path to the file containing the type.</summary>
         [NotNull] private static string LayerFilePath => $"{Application.dataPath}/{Settings.Layer.FilePath}";
 
-        /// <summary>Used to read the values from the Enum. If we don't use reflection to find the Enums, we tie ourselves to a specific configuration which isn't ideal.</summary>
+        /// <summary>Used to read the values from the type. If we don't use reflection to find the type, we tie ourselves to a specific configuration which isn't ideal.</summary>
         [CanBeNull] private static Type LayerType => Type.GetType($"{Settings.Layer.Namespace}.{Settings.Layer.TypeName}, {Settings.Layer.Assembly}");
-
-        /// <summary>Type name for layer masks.</summary>
-        [NotNull] private static string MaskTypeName => $"{Settings.Layer.TypeName}Masks";
 
         /// <summary>Configures the callback for when the editor sends a message the project has changed.</summary>
         [InitializeOnLoadMethod]
@@ -48,8 +45,8 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
             GenerateFile();
         }
 
-        /// <summary>Checks if the Enum type exists. This will let us know if we can use reflection on it to check for changes in layers.</summary>
-        /// <returns>True if the Enum type exists.</returns>
+        /// <summary>Checks if the type exists. This will let us know if we can use reflection on it to check for changes in layers.</summary>
+        /// <returns>True if the type exists.</returns>
         private bool TypeExists()
         {
             if (LayerType != null) return true;
@@ -73,9 +70,9 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
             return true;
         }
 
-        /// <summary>Checks if the values defined in the Enum are the same as in Unity itself.</summary>
+        /// <summary>Checks if the values defined in the type are the same as in Unity itself.</summary>
         /// <remarks>The checks are performed against the layer name and the layer ID. This should catch renames.</remarks>
-        /// <returns>True if they are the <see cref="LayerType" /> enum and project layers match.</returns>
+        /// <returns>True if they the <see cref="LayerType" /> type and project layers match.</returns>
         private bool HasChangedLayers()
         {
             _inUnity.Clear();
@@ -83,17 +80,17 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
             foreach (string layer in InternalEditorUtility.layers)
             {
                 string layerName = layer.Replace(" ", Empty);
-                int layerValue = LayerMask.NameToLayer(layer);
-
-                _inUnity.Add(new ValueTuple<string, int>(layerName, layerValue));
+                _inUnity.Add(new ValueTuple<string, int>(layerName, LayerMask.NameToLayer(layer)));
             }
 
-            _inEnum.Clear();
+            _inType.Clear();
 
-            foreach (int enumValue in Enum.GetValues(LayerType))
-                _inEnum.Add(new ValueTuple<string, int>(Enum.GetName(LayerType, enumValue), enumValue));
+            FieldInfo[] fields = LayerType.GetFields(BindingFlags.Public | BindingFlags.Static);
+            foreach (FieldInfo fieldInfo in fields)
+                if (fieldInfo.IsLiteral)
+                    _inType.Add(new ValueTuple<string, int>(fieldInfo.Name, (int) fieldInfo.GetValue(null)));
 
-            return !_inEnum.SetEquals(_inUnity);
+            return !_inType.SetEquals(_inUnity);
         }
 
         /// <inheritdoc />
@@ -103,53 +100,28 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
             var compileUnit = new CodeCompileUnit();
             var codeNamespace = new CodeNamespace(Settings.Layer.Namespace);
             compileUnit.Namespaces.Add(codeNamespace);
-            codeNamespace.Imports.Add(new CodeNamespaceImport(nameof(System)));
 
             // Validate the namespace.
             ValidateIdentifier(codeNamespace, Settings.Layer.Namespace);
 
-            // Declare a pair of enum types that are public.
-            var layersEnum = new CodeTypeDeclaration(Settings.Layer.TypeName)
-            {
-                IsEnum = true,
-                TypeAttributes = TypeAttributes.Public
-            };
-
-            // Validate the type name.
-            ValidateIdentifier(layersEnum, Settings.Layer.TypeName);
-
-            var layerMasksEnum = new CodeTypeDeclaration(MaskTypeName)
-            {
-                IsEnum = true,
-                TypeAttributes = TypeAttributes.Public
-            };
-
-            // Validate the type name.
-            ValidateIdentifier(layerMasksEnum, MaskTypeName);
-
-            // Put the Flags attribute on the LayerMasks enum to allow us to check multiple layers at once.
-            layerMasksEnum.CustomAttributes.Add(new CodeAttributeDeclaration(nameof(FlagsAttribute)));
-
-            // Add some comments so the class describes it's intended usage.
-            AddCommentsToLayerEnum(layersEnum);
-            AddCommentsToLayerMasksEnum(layerMasksEnum);
-
-            // Create members in both of the enums for each layer in the project.
-            CreateLayerMembers(layersEnum, layerMasksEnum);
+            // Declare a type that is public and sealed.
+            var layerType = new CodeTypeDeclaration(Settings.Layer.TypeName) {IsClass = true, TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed};
+            ValidateIdentifier(layerType, Settings.Layer.TypeName);
 
             // Add the type declarations to the namespace.
-            codeNamespace.Types.Add(layersEnum);
-            codeNamespace.Types.Add(layerMasksEnum);
+            codeNamespace.Types.Add(layerType);
+
+            // Add some comments so the type describes it's intended usage.
+            AddCommentsToLayerType(layerType);
+
+            // Add layer members to the type.
+            CreateLayerMembers(layerType);
 
             // With a StringWriter and a CSharpCodeProvider; generate the code.
             using (var stringWriter = new StringWriter())
             {
                 using (var codeProvider = new CSharpCodeProvider())
-                    codeProvider.GenerateCodeFromCompileUnit(compileUnit, stringWriter, new CodeGeneratorOptions
-                    {
-                        BracingStyle = "C",
-                        BlankLinesBetweenMembers = false
-                    });
+                    codeProvider.GenerateCodeFromCompileUnit(compileUnit, stringWriter, new CodeGeneratorOptions {BracingStyle = "C", BlankLinesBetweenMembers = false});
 
                 // Create the asset path if it doesn't already exist.
                 CreateAssetPathIfNotExists(LayerFilePath);
@@ -165,55 +137,61 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 
         /// <summary>Adds a verbose comment on how to use the Layer enum.</summary>
         /// <param name="typeDeclaration">The <see cref="CodeTypeDeclaration" /> to add the comment to.</param>
-        private void AddCommentsToLayerEnum([NotNull] CodeTypeMember typeDeclaration)
+        private void AddCommentsToLayerType([NotNull] CodeTypeMember typeDeclaration)
         {
             var commentStatement = new CodeCommentStatement(
-                "<summary>\r\n Use this enum in place of layer names in code / scripts.\r\n </summary>" +
-                "\r\n <example>\r\n <code>\r\n if (other.gameObject.layer == Layer.Characters) {\r\n     Destroy(other.gameObject);" +
+                "<summary>\r\n Use this type in place of layer names in code / scripts.\r\n </summary>" +
+                $"\r\n <example>\r\n <code>\r\n if (other.gameObject.layer == {Settings.Layer.TypeName}.Characters) {{\r\n     Destroy(other.gameObject);" +
                 "\r\n }\r\n </code>\r\n </example>",
                 true);
 
             typeDeclaration.Comments.Add(commentStatement);
         }
 
-        /// <summary>Adds a verbose comment on how to use the LayerMask enum.</summary>
+        /// <summary>Adds a verbose comment on how to use the Layer.Mask type.</summary>
         /// <param name="typeDeclaration">The <see cref="CodeTypeDeclaration" /> to add the comment to.</param>
-        private void AddCommentsToLayerMasksEnum([NotNull] CodeTypeMember typeDeclaration)
+        private void AddCommentsToLayerMaskType([NotNull] CodeTypeMember typeDeclaration)
         {
             var commentStatement = new CodeCommentStatement(
-                "<summary>\r\n Use this enum in place of layer mask values in code / scripts.\r\n </summary>" +
-                "\r\n <example>\r\n <code>\r\n if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), " +
-                "out RaycastHit hit, Mathf.Infinity, (int) (LayerMasks.Characters | LayerMasks.Water)) {\r\n     " +
-                "Debug.Log(\"Did Hit\");\r\n }\r\n </code>\r\n </example>",
+                "<summary>\r\n Use this type in place of layer or layer mask values in code / scripts.\r\n </summary>\r\n <example>\r\n <code>\r\n if " +
+                "(Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out RaycastHit hit, Mathf.Infinity, " +
+                $"{Settings.Layer.TypeName}.Mask.Characters | {Settings.Layer.TypeName}.Mask.Water) {{\r\n     Debug.Log(\"Did Hit\");\r\n }}\r\n </code>\r\n </example>",
                 true);
 
             typeDeclaration.Comments.Add(commentStatement);
         }
 
-        /// <summary>Creates members for each layers in the project and adds them to the <paramref name="layersEnum" /> and <paramref name="layerMasksEnum" />.</summary>
-        /// <param name="layersEnum">The <see cref="CodeTypeDeclaration" /> to add the layer ID's to.</param>
-        /// <param name="layerMasksEnum">The <see cref="CodeTypeDeclaration" /> to add the layer masks to.</param>
-        private void CreateLayerMembers(CodeTypeDeclaration layersEnum, CodeTypeDeclaration layerMasksEnum)
+        /// <summary>Creates members for each layer in the project and adds them to the <paramref name="layerType" /> along with a nested type called "Mask".</summary>
+        /// <param name="layerType">The <see cref="CodeTypeDeclaration" /> to add the layer ID's to.</param>
+        private void CreateLayerMembers(CodeTypeDeclaration layerType)
         {
+            // Declare a nested type for the masks.
+            var maskType = new CodeTypeDeclaration("Mask") {IsClass = true, TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed};
+            layerType.Members.Add(maskType);
+
+            // Add comments to the nested type.
+            AddCommentsToLayerMaskType(maskType);
+
             foreach (string layer in InternalEditorUtility.layers)
             {
+                if (LayerMask.NameToLayer(layer) == 31)
+                    throw new InvalidOperationException("Layer 31 is used internally by the Editor’s Preview window mechanics. To prevent clashes, do not use this layer.");
+
                 string safeName = layer.Replace(" ", Empty);
 
-                // Layer ID enum
-                var field = new CodeMemberField(Settings.Layer.TypeName, safeName)
-                {
-                    InitExpression = new CodePrimitiveExpression(LayerMask.NameToLayer(layer))
-                };
-                ValidateIdentifier(field, layer);
-                layersEnum.Members.Add(field);
+                const MemberAttributes attributes = MemberAttributes.Public | MemberAttributes.Const;
 
-                // LayerMasks enum
-                field = new CodeMemberField(MaskTypeName, safeName)
-                {
-                    InitExpression = new CodePrimitiveExpression(LayerMask.GetMask(layer))
-                };
-                ValidateIdentifier(field, layer);
-                layerMasksEnum.Members.Add(field);
+                // Layer
+                var layerField = new CodeMemberField(typeof(int), safeName) {Attributes = attributes, InitExpression = new CodePrimitiveExpression(LayerMask.NameToLayer(layer))};
+                ValidateIdentifier(layerField, layer);
+
+                layerType.Members.Add(layerField);
+
+                // Mask
+                var maskField = new CodeMemberField(typeof(int), safeName) {Attributes = attributes, InitExpression = new CodePrimitiveExpression(LayerMask.GetMask(layer))};
+                ValidateIdentifier(maskField, layer);
+
+                maskType.Members.Add(maskField);
             }
         }
     }

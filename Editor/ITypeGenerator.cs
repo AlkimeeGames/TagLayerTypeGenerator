@@ -8,7 +8,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
     public interface ITypeGenerator
     {
         /// <summary>Invoked when the a file is generated.</summary>
-        [PublicAPI] event UnityAction OnFileGeneration;
+        [PublicAPI] event UnityAction FileGenerated;
 
         /// <summary>Generates a new type file.</summary>
         [PublicAPI] void GenerateFile();

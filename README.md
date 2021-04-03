@@ -8,29 +8,26 @@
 [![](https://img.shields.io/badge/Keep%20a%20Changelog-v1.0.0-green.svg?logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9IiNmMTVkMzAiIHZpZXdCb3g9IjAgMCAxODcgMTg1Ij48cGF0aCBkPSJNNjIgN2MtMTUgMy0yOCAxMC0zNyAyMmExMjIgMTIyIDAgMDAtMTggOTEgNzQgNzQgMCAwMDE2IDM4YzYgOSAxNCAxNSAyNCAxOGE4OSA4OSAwIDAwMjQgNCA0NSA0NSAwIDAwNiAwbDMtMSAxMy0xYTE1OCAxNTggMCAwMDU1LTE3IDYzIDYzIDAgMDAzNS01MiAzNCAzNCAwIDAwLTEtNWMtMy0xOC05LTMzLTE5LTQ3LTEyLTE3LTI0LTI4LTM4LTM3QTg1IDg1IDAgMDA2MiA3em0zMCA4YzIwIDQgMzggMTQgNTMgMzEgMTcgMTggMjYgMzcgMjkgNTh2MTJjLTMgMTctMTMgMzAtMjggMzhhMTU1IDE1NSAwIDAxLTUzIDE2bC0xMyAyaC0xYTUxIDUxIDAgMDEtMTItMWwtMTctMmMtMTMtNC0yMy0xMi0yOS0yNy01LTEyLTgtMjQtOC0zOWExMzMgMTMzIDAgMDE4LTUwYzUtMTMgMTEtMjYgMjYtMzMgMTQtNyAyOS05IDQ1LTV6TTQwIDQ1YTk0IDk0IDAgMDAtMTcgNTQgNzUgNzUgMCAwMDYgMzJjOCAxOSAyMiAzMSA0MiAzMiAyMSAyIDQxLTIgNjAtMTRhNjAgNjAgMCAwMDIxLTE5IDUzIDUzIDAgMDA5LTI5YzAtMTYtOC0zMy0yMy01MWE0NyA0NyAwIDAwLTUtNWMtMjMtMjAtNDUtMjYtNjctMTgtMTIgNC0yMCA5LTI2IDE4em0xMDggNzZhNTAgNTAgMCAwMS0yMSAyMmMtMTcgOS0zMiAxMy00OCAxMy0xMSAwLTIxLTMtMzAtOS01LTMtOS05LTEzLTE2YTgxIDgxIDAgMDEtNi0zMiA5NCA5NCAwIDAxOC0zNSA5MCA5MCAwIDAxNi0xMmwxLTJjNS05IDEzLTEzIDIzLTE2IDE2LTUgMzItMyA1MCA5IDEzIDggMjMgMjAgMzAgMzYgNyAxNSA3IDI5IDAgNDJ6bS00My03M2MtMTctOC0zMy02LTQ2IDUtMTAgOC0xNiAyMC0xOSAzN2E1NCA1NCAwIDAwNSAzNGM3IDE1IDIwIDIzIDM3IDIyIDIyLTEgMzgtOSA0OC0yNGE0MSA0MSAwIDAwOC0yNCA0MyA0MyAwIDAwLTEtMTJjLTYtMTgtMTYtMzEtMzItMzh6bS0yMyA5MWgtMWMtNyAwLTE0LTItMjEtN2EyNyAyNyAwIDAxLTEwLTEzIDU3IDU3IDAgMDEtNC0yMCA2MyA2MyAwIDAxNi0yNWM1LTEyIDEyLTE5IDI0LTIxIDktMyAxOC0yIDI3IDIgMTQgNiAyMyAxOCAyNyAzM3MtMiAzMS0xNiA0MGMtMTEgOC0yMSAxMS0zMiAxMXptMS0zNHYxNGgtOFY2OGg4djI4bDEwLTEwaDExbC0xNCAxNSAxNyAxOEg5NnoiLz48L3N2Zz4K)](https://github.com/AlkimeeGames/TagLayerTypeGenerator/blob/develop/CHANGELOG.md)
 [![GitHub Org's Stars](https://img.shields.io/github/stars/alkimeegames?style=social)](https://github.com/AlkimeeGames)
 
-> Generates statically typed classes for the Tags and Layers in your Unity projects **automatically**, with no manual button pushes required. **Simply set and forget!**
+> Generates types for Tags and Layers in Unity projects - **automatically**, with no manual button pushes required. **Simply set and forget!**
 
 ## What is the Tag / Layer Type Generator?
 
 The Tag / Layer Type Generator automatically generates types for the [Tags and Layers](https://docs.unity3d.com/Manual/class-TagManager.html) defined in your Unity project. A
 developer can then use these types to ensure that at compile-time, any tags or layers used during runtime will be correct. Using tags and layers in this way ensures that should a
-tag be changed or a layer ID updated, the .NET compiler will flag this as a compilation error long before bugs appear at runtime, which is often a symptom of using
+tag or layer change, the .NET compiler will flag this as a compilation error long before bugs appear at runtime, which is often a symptom of using
 so-called '[magic strings](https://en.wikipedia.org/wiki/Magic_string)'.
 
-## Why use strongly typed Tags and Layers?
+## Why use typed Tags and Layers?
 
-Using statically typed tags and layers in your projects code provides compile-time checking of the tag and layer values. However, that's not the only advantage. Another use for the
-generated LayerMasks enum is as a property of any MonoBehaviour or ScriptableObject, allowing you to specify multiple Layers as a property directly on gameObject. This can be
-useful if you want to define in the editor what layers to check for a collision or raycast against (or anywhere that Unity accepts
-a [LayerMask](https://docs.unity3d.com/ScriptReference/LayerMask.html)). See examples below for more details.
+Using typed tags and layers in your project's code provides compile-time checking of the tag and layer values. Using the included Tag or Layer attributes on a string or int property
+respectively also allows you to adjust these values in the inspector. See examples below.
 
 ## Whats wrong with [UnityEngine.LayerMask](https://docs.unity3d.com/ScriptReference/LayerMask.html)?
 
-Unity's LayerMask struct provides methods for converting a layer name from a *string* into its corresponding ID or LayerMask bitmask (and conversely a layer ID back into it's
-string name). However this requires you specify the string in your code which is prone to causing errors at runtime should a layer name be changed (the same applies to tags, too).
-You could mitigate this by defining a class with the LayerNames as strings and refer to that everywhere in your code, but then you lose the benefit of being able to use the
-generated LayerMasks Enum as a property in your MonoBehaviours or ScriptableObjects. It's also not a great developer experience having to call LayerMask.GetMask("LayerName"), when
-a constantly defined type and value would be sufficient less prone to bugs.
+Nothing! The generated types are designed to augment the usage of Unity's LayerMask struct. The LayerMask struct provides methods for converting a layer from a string into its
+corresponding ID (int) and vice versa. However, both approaches require you to use '[magic strings](https://en.wikipedia.org/wiki/Magic_string)' in your code. Using typed values for
+both the layer id and the mask allows you to catch errors at compile time. The layer type also contains pre-computer masks for each layer, making it simple to create layer masks from
+the types.
 
 ## Setup
 
@@ -60,27 +57,20 @@ public sealed class Bullet : MonoBehaviour
  }
 ```
 
-### Layer Masks
-
-#### As property of GameObjects
+### Layers
 
 ```c#
-public sealed class Bullet : MonoBehaviour
+public sealed class TransparentFX : MonoBehaviour
 {
-    /// Set which layers you want to collide with. The inspector will show a multi-select dropdown of the layers.
-    [SerializedField] private LayerMasks _collideAgainst;
-
-    private void FixedUpdate()
+    private void Awake()
     {
-        if (Physics.Raycast(transform.position, transform.forward, 20.0f, (int) _collideAgainst))
-        {
-            OnCollision();
-        }
+        // Use the Layer ID for TransparentFX.
+        gameObject.layer = Layer.TransparentFX;
     }
  }
 ```
 
-#### Used for assignment
+### Layer Masks
 
 ```c#
 public class ExampleClass : MonoBehaviour
@@ -90,7 +80,42 @@ public class ExampleClass : MonoBehaviour
     void Start()
     {
         // Only render objects on the default layer.
-        _mainCamera.cullingMask = (int) Layer.Default;
+        _mainCamera.cullingMask = Layer.Mask.Default;
+    }
+
+    private void FixedUpdate()
+    {
+        // Collide against Water and Walls using their masks.
+        if (Physics.Raycast(transform.position, transform.forward, 20.0f, Layer.Mask.Water | Layer.Mask.Walls))
+        {
+            OnCollision();
+        }
+    }
+}
+```
+
+## Attributes
+
+If you want to use Tags or Layers as properties in a MonoBehaviour or ScriptableObject you can use the attributes provided. This will display a Tag or Layer field in the inspector.
+
+```c#
+public class ExampleClass : MonoBehaviour
+{
+    [Tag] public string tag;
+    [Layer] public int layer;
+
+    // Unity already provides an inspecor for the UnityEngine.LayerMask struct.
+    public LayerMask layerMask;
+
+    private void OnCollisionEnter([Collision other)
+    {
+        // You can safely use the tag in CampareTag checks.
+        if (other.gameObject.CompareTag(tag)) {
+            Destroy(other.gameObject);
+        }
+
+        // ... or the layer ID
+        other.layer = layer;
     }
 }
 ```
@@ -114,17 +139,6 @@ parameters of both the Tag and Layer Types:
 Path and AssemblyDefinition settings are set correctly, as the Generators use reflection against generated types to determine if new Tags or Layers have been added. It can only
 perform this reflection if it knows which Assembly Definition the generated types are compiled in. You can leave this set to none if Assembly Definitions aren't in use in the
 project.
-
-## LayerMasks finer details
-
-The Layer Type Generator creates two [Enums](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/enum) inside a single generated file. One is the layer
-identifier. The other is a LayerMasks Enum which can be used to combine multiple layers together to create a LayerMask. Due to the usage of
-the [Flags](https://docs.microsoft.com/en-us/dotnet/api/system.flagsattribute?view=netstandard-2.0) attribute, it becomes very straight forward to check for multiple layers
-in [Physics.Raycast](https://docs.unity3d.com/ScriptReference/Physics.Raycast.html) calls (for example) and can be used as a property on a gameObject, adjustable right in the
-inspector!
-
-The only downside to using Enum's for layers is the required explicit cast of the Enum to an int. This has little-to-no performance impact, whilst I gaining all of benefits
-mentioned above, such as the compile-time error checking and access as a property in the inspector.
 
 ## API and Extensibility
 
@@ -207,46 +221,47 @@ namespace AlkimeeGames.Alkimee
 ```c#
 namespace AlkimeeGames.Alkimee
 {
-    using System;
 
     /// <summary>
-    /// Use this enum in place of layer names in code / scripts.
+    /// Use this type in place of layer names in code / scripts.
     /// </summary>
     /// <example>
     /// <code>
-    /// if (other.gameObject.layer == Layer.Collectable) {
+    /// if (other.gameObject.layer == Layer.Characters) {
     ///     Destroy(other.gameObject);
     /// }
     /// </code>
     /// </example>
-    public enum Layer
+    public sealed class Layer
     {
-        Default = 0,
-        TransparentFX = 1,
-        IgnoreRaycast = 2,
-        Water = 4,
-        UI = 5,
-        Collectable = 6,
-    }
-    /// <summary>
-    /// Use this enum in place of layer mask values in code / scripts.
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// if (Physics.Raycast(t.position, t.TransformDirection(Vector3.forward), out RaycastHit hit, Mathf.Infinity, (int) (LayerMasks.Collectable | LayerMasks.Water)) {
-    ///     Debug.Log("Did Hit");
-    /// }
-    /// </code>
-    /// </example>
-    [FlagsAttribute()]
-    public enum LayerMasks
-    {
-        Default = 1,
-        TransparentFX = 2,
-        IgnoreRaycast = 4,
-        Water = 16,
-        UI = 32,
-        Collectable = 64,
+        public const int Default = 0;
+        public const int TransparentFX = 1;
+        public const int IgnoreRaycast = 2;
+        public const int Water = 4;
+        public const int UI = 5;
+        public const int Collectable = 6;
+        public const int Layer30 = 30;
+
+        /// <summary>
+        /// Use this type in place of layer or layer mask values in code / scripts.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out RaycastHit hit, Mathf.Infinity, Layer.Mask.Characters | Layer.Mask.Water) {
+        ///     Debug.Log("Did Hit");
+        /// }
+        /// </code>
+        /// </example>
+        public sealed class Mask
+        {
+            public const int Default = 1;
+            public const int TransparentFX = 2;
+            public const int IgnoreRaycast = 4;
+            public const int Water = 16;
+            public const int UI = 32;
+            public const int Collectable = 64;
+            public const int Layer30 = 1073741824;
+        }
     }
 }
 

@@ -14,7 +14,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         [PublicAPI] public static ITypeGenerator Generator => Instance;
 
         /// <summary>Invoked when the file is generated.</summary>
-        public event UnityAction OnFileGeneration;
+        public event UnityAction FileGenerated;
 
         /// <inheritdoc />
         public abstract void GenerateFile();
@@ -22,10 +22,10 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <inheritdoc />
         public abstract bool CanGenerate();
 
-        /// <summary>Invokes <see cref="OnFileGeneration" />.</summary>
+        /// <summary>Invokes <see cref="FileGenerated" />.</summary>
         protected void InvokeOnFileGeneration()
         {
-            OnFileGeneration?.Invoke();
+            FileGenerated?.Invoke();
         }
 
         /// <summary>Creates the path for the file asset.</summary>
