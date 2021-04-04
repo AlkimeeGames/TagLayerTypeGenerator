@@ -1,6 +1,8 @@
 ﻿using System;
 using System.CodeDom;
 using System.Reflection;
+using AlkimeeGames.TagLayerTypeGenerator.Editor.Settings;
+using AlkimeeGames.TagLayerTypeGenerator.Editor.Sync;
 using JetBrains.Annotations;
 using UnityEditor;
 using UnityEditorInternal;
@@ -12,22 +14,14 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
     /// <summary>Generates a file containing a type; which contains constant int definitions for each Layer in the project.</summary>
     internal sealed class LayerTypeGenerator : TypeGenerator<LayerTypeGenerator>
     {
-        /// <summary>Checks for updates to the Layers in the Project.</summary>
-        private readonly LayerUpdateChecker _layerUpdateChecker;
-
         /// <inheritdoc />
-        private LayerTypeGenerator([NotNull] TypeGeneratorSettings.Settings settings) : base(settings)
+        private LayerTypeGenerator([NotNull] TypeGeneratorSettings.Settings settings, ISync sync) : base(settings, sync)
         {
-            _layerUpdateChecker = new LayerUpdateChecker();
         }
 
         /// <summary>Runs when the Editor starts or on a domain reload.</summary>
         [InitializeOnLoadMethod]
-        public static void InitializeOnLoad() => new LayerTypeGenerator(TypeGeneratorSettings.GetOrCreateSettings.Layer);
-
-        /// <summary>Are the Layers different to the Layers in the type?</summary>
-        /// <returns>True if there are changes to the Layers in the project.</returns>
-        protected override bool HasUpdates() => _layerUpdateChecker.HasUpdates(GeneratingType);
+        public static void InitializeOnLoad() => new LayerTypeGenerator(TypeGeneratorSettings.GetOrCreateSettings.Layer, new LayerSync());
 
         /// <summary>Creates members for each layer in the project and adds them to the <paramref name="layerType" /> along with a nested type called "Mask".</summary>
         /// <param name="layerType">The <see cref="CodeTypeDeclaration" /> to add the layer ID's to.</param>

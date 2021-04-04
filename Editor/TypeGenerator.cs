@@ -3,6 +3,8 @@ using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.IO;
 using System.Reflection;
+using AlkimeeGames.TagLayerTypeGenerator.Editor.Settings;
+using AlkimeeGames.TagLayerTypeGenerator.Editor.Sync;
 using JetBrains.Annotations;
 using Microsoft.CSharp;
 using UnityEditor;
@@ -17,14 +19,19 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <summary>Backing field for <see cref="Generator" />.</summary>
         private static TypeGenerator<T> _instance;
 
+        /// <summary>Checks for updates to the Tags in the Project.</summary>
+        private readonly ISync _sync;
+
         /// <summary>The settings for the <see cref="TypeGenerator{T}" />.</summary>
         protected readonly TypeGeneratorSettings.Settings Settings;
 
         /// <summary>Instantiates a new instance of <see cref="TypeGenerator{T}" />. Subscribes to <see cref="EditorApplication.projectChanged" />.</summary>
         /// <param name="settings">The settings to use for this <see cref="TypeGenerator{T}" />.</param>
-        protected TypeGenerator([NotNull] TypeGeneratorSettings.Settings settings)
+        /// <param name="sync">Sync values between the project and the type.</param>
+        protected TypeGenerator([NotNull] TypeGeneratorSettings.Settings settings, ISync sync)
         {
             _instance = this;
+            _sync = sync;
             Settings = settings;
             EditorApplication.projectChanged += OnProjectChanged;
         }
@@ -33,7 +40,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         [PublicAPI] public static ITypeGenerator Generator => _instance;
 
         /// <summary>Used to read the values from the type. If we don't use reflection to find the type, we tie ourselves to a specific configuration which isn't ideal.</summary>
-        [CanBeNull] protected Type GeneratingType => Type.GetType($"{Settings.Namespace}.{Settings.TypeName}, {Settings.Assembly}");
+        [CanBeNull] private Type GeneratingType => Type.GetType($"{Settings.Namespace}.{Settings.TypeName}, {Settings.Assembly}");
 
         /// <summary>The absolute path for the generated code.</summary>
         [NotNull] private string AbsoluteFilePath => $"{Application.dataPath}/{Settings.FilePath}";
@@ -43,7 +50,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 
         /// <summary>Validates if we can generate a new tags file.</summary>
         /// <returns><see langword="true" /> if all conditions are met.</returns>
-        public bool CanGenerate() => SettingsValidator.ValidateAll(Settings);
+        public bool CanGenerate() => TypeGeneratorSettingsValidator.ValidateAll(Settings);
 
         /// <summary>Generates a new Tags type file.</summary>
         public void GenerateFile()
@@ -87,7 +94,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 
         /// <summary>Checks if the values defined in the type are the same as in Unity itself.</summary>
         /// <returns>True if the type members match the project values.</returns>
-        protected abstract bool HasUpdates();
+        private bool HasUpdates() => _sync.HasUpdates(GeneratingType);
 
         private void SetupNamespaceAndType([NotNull] CodeCompileUnit codeCompileUnit)
         {
@@ -138,7 +145,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
             }
             catch (ArgumentException)
             {
-                Debug.LogErrorFormat(SettingsValidator.InvalidIdentifier, identifier);
+                Debug.LogErrorFormat(TypeGeneratorSettingsValidator.InvalidIdentifier, identifier);
                 throw;
             }
         }

@@ -1,10 +1,10 @@
 ﻿using JetBrains.Annotations;
 using UnityEngine;
 
-namespace AlkimeeGames.TagLayerTypeGenerator.Editor
+namespace AlkimeeGames.TagLayerTypeGenerator.Editor.Settings
 {
     /// <summary>Holds the defaults values for the <see cref="TypeGeneratorSettings" />.</summary>
-    internal static class DefaultTypeGeneratorSettings
+    internal static class TypeGeneratorSettingsDefaults
     {
         /// <summary>Default value for <see cref="TypeGeneratorSettings.Tag" /> <see cref="TypeGeneratorSettings.Settings.TypeName" />.</summary>
         private const string DefaultTagTypeName = "Tag";

@@ -1,16 +1,17 @@
 ﻿using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
-#if UNITY_2019_1_OR_NEWER
 using UnityEngine.UIElements;
+
+#if UNITY_2019_1_OR_NEWER
 
 #else
 using UnityEngine.Experimental.UIElements;
 #endif
 
-namespace AlkimeeGames.TagLayerTypeGenerator.Editor
+namespace AlkimeeGames.TagLayerTypeGenerator.Editor.Settings
 {
-    /// <summary>Settings provider for <see cref="TagLayerTypeGenerator.Editor.TypeGeneratorSettings" />.</summary>
+    /// <summary>Settings provider for <see cref="TypeGeneratorSettings" />.</summary>
     internal sealed class TypeGeneratorSettingsProvider : SettingsProvider
     {
         /// <summary>Path to the Project Settings.</summary>
@@ -19,7 +20,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <summary>Path to the built-in Tags and Layers Manager.</summary>
         private const string TagsAndLayersProjectSettings = "Project/Tags and Layers";
 
-        /// <summary><see cref="TagLayerTypeGenerator.Editor.TypeGeneratorSettings" /> wrapped in a <see cref="SerializedObject" />.</summary>
+        /// <summary><see cref="TypeGeneratorSettings" /> wrapped in a <see cref="SerializedObject" />.</summary>
         private SerializedObject _settings;
 
         /// <inheritdoc />

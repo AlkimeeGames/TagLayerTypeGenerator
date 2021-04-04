@@ -6,7 +6,7 @@ using UnityEditorInternal;
 using UnityEngine;
 using static System.String;
 
-namespace AlkimeeGames.TagLayerTypeGenerator.Editor
+namespace AlkimeeGames.TagLayerTypeGenerator.Editor.Settings
 {
     /// <summary>Settings for <see cref="TagTypeGenerator" />.</summary>
     public sealed class TypeGeneratorSettings : ScriptableObject
@@ -27,7 +27,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         {
             get
             {
-                string[] guids = AssetDatabase.FindAssets($"t:{nameof(TypeGeneratorSettings)}", DefaultTypeGeneratorSettings.SearchInFolders);
+                string[] guids = AssetDatabase.FindAssets($"t:{nameof(TypeGeneratorSettings)}", TypeGeneratorSettingsDefaults.SearchInFolders);
 
                 TypeGeneratorSettings settings;
 
@@ -51,15 +51,15 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <summary>Reset to default values.</summary>
         private void Reset()
         {
-            Tag = DefaultTypeGeneratorSettings.Tag;
-            Layer = DefaultTypeGeneratorSettings.Layer;
+            Tag = TypeGeneratorSettingsDefaults.Tag;
+            Layer = TypeGeneratorSettingsDefaults.Layer;
         }
 
         /// <summary>This function is called when the script is loaded or a value is changed in the Inspector (Called in the editor only).</summary>
         private void OnValidate()
         {
-            SettingsValidator.ValidateAll(Tag);
-            SettingsValidator.ValidateAll(Layer);
+            TypeGeneratorSettingsValidator.ValidateAll(Tag);
+            TypeGeneratorSettingsValidator.ValidateAll(Layer);
         }
 
         /// <summary>Loads <see cref="GUID" /> via <see cref="GUID" />.</summary>

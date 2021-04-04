@@ -5,10 +5,10 @@ using JetBrains.Annotations;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace AlkimeeGames.TagLayerTypeGenerator.Editor
+namespace AlkimeeGames.TagLayerTypeGenerator.Editor.Sync
 {
     /// <summary>Checks for updates to the Layers in the Project.</summary>
-    internal sealed class LayerUpdateChecker
+    internal sealed class LayerSync : ISync
     {
         /// <summary>Used to check if what layer strings and IDs are in the Layer type.</summary>
         private readonly HashSet<ValueTuple<string, int>> _inType = new HashSet<ValueTuple<string, int>>();
@@ -16,9 +16,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <summary>Used to check if what layer strings and IDs are in the project.</summary>
         private readonly HashSet<ValueTuple<string, int>> _inUnity = new HashSet<ValueTuple<string, int>>();
 
-        /// <summary>Are the Layers different to the Layers in the type?</summary>
-        /// <param name="generatingType"></param>
-        /// <returns>True if there are changes to the Layers in the project.</returns>
+        /// <inheritdoc />
         public bool HasUpdates([NotNull] Type generatingType)
         {
             if (generatingType == null) throw new ArgumentNullException(nameof(generatingType));

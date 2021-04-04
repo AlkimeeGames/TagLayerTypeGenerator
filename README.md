@@ -227,7 +227,7 @@ namespace AlkimeeGames.Alkimee
     /// </summary>
     /// <example>
     /// <code>
-    /// if (other.gameObject.layer == Layer.Characters) {
+    /// if (other.gameObject.layer == Layer.Collectable) {
     ///     Destroy(other.gameObject);
     /// }
     /// </code>
@@ -247,7 +247,7 @@ namespace AlkimeeGames.Alkimee
         /// </summary>
         /// <example>
         /// <code>
-        /// if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out RaycastHit hit, Mathf.Infinity, Layer.Mask.Characters | Layer.Mask.Water) {
+        /// if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out RaycastHit hit, Mathf.Infinity, Layer.Mask.Collectable | Layer.Mask.Water) {
         ///     Debug.Log("Did Hit");
         /// }
         /// </code>

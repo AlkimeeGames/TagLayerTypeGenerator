@@ -1,4 +1,6 @@
 ﻿using System.CodeDom;
+using AlkimeeGames.TagLayerTypeGenerator.Editor.Settings;
+using AlkimeeGames.TagLayerTypeGenerator.Editor.Sync;
 using JetBrains.Annotations;
 using UnityEditor;
 using UnityEditorInternal;
@@ -6,20 +8,17 @@ using static System.String;
 
 namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 {
+    /// <summary>Generates a file containing a type; which contains constant string definitions for each Tag in the project.</summary>
     internal sealed class TagTypeGenerator : TypeGenerator<TagTypeGenerator>
     {
-        /// <summary>Checks for updates to the Tags in the Project.</summary>
-        private readonly TagUpdatesChecker _tagUpdatesChecker;
-
         /// <inheritdoc />
-        private TagTypeGenerator([NotNull] TypeGeneratorSettings.Settings settings) : base(settings)
+        private TagTypeGenerator([NotNull] TypeGeneratorSettings.Settings settings, ISync sync) : base(settings, sync)
         {
-            _tagUpdatesChecker = new TagUpdatesChecker();
         }
 
         /// <summary>Runs when the Editor starts or on a domain reload.</summary>
         [InitializeOnLoadMethod]
-        public static void InitializeOnLoad() => new TagTypeGenerator(TypeGeneratorSettings.GetOrCreateSettings.Tag);
+        public static void InitializeOnLoad() => new TagTypeGenerator(TypeGeneratorSettings.GetOrCreateSettings.Tag, new TagSync());
 
         /// <summary>Creates members for each tag in the project and adds them to the <paramref name="typeDeclaration" />.</summary>
         /// <param name="typeDeclaration">The <see cref="CodeTypeDeclaration" /> to add the tag members to.</param>
@@ -44,14 +43,11 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         {
             var commentStatement =
                 new CodeCommentStatement(
-                    $"<summary>\r\n Use these string constants when comparing tags in code / scripts.\r\n </summary>\r\n <example>\r\n <code>\r\n if (other.gameObject.CompareTag({Settings.TypeName}.Player)) {{\r\n     Destroy(other.gameObject);\r\n }}\r\n </code>\r\n </example>",
+                    "<summary>\r\n Use these string constants when comparing tags in code / scripts.\r\n </summary>\r\n <example>\r\n <code>\r\n if " +
+                    $"(other.gameObject.CompareTag({Settings.TypeName}.Player)) {{\r\n     Destroy(other.gameObject);\r\n }}\r\n </code>\r\n </example>",
                     true);
 
             typeDeclaration.Comments.Add(commentStatement);
         }
-
-        /// <summary>Are the Tags different to the Tags in the type?</summary>
-        /// <returns>True if there are changes to the Tags in the project.</returns>
-        protected override bool HasUpdates() => _tagUpdatesChecker.HasUpdates(GeneratingType);
     }
 }
