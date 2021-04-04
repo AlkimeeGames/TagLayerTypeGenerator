@@ -8,10 +8,9 @@ using UnityEngine.UIElements;
 using UnityEngine.Experimental.UIElements;
 #endif
 
-
 namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 {
-    /// <summary>Settings provider for <see cref="TypeGeneratorSettings" />.</summary>
+    /// <summary>Settings provider for <see cref="TagLayerTypeGenerator.Editor.TypeGeneratorSettings" />.</summary>
     internal sealed class TypeGeneratorSettingsProvider : SettingsProvider
     {
         /// <summary>Path to the Project Settings.</summary>
@@ -20,7 +19,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <summary>Path to the built-in Tags and Layers Manager.</summary>
         private const string TagsAndLayersProjectSettings = "Project/Tags and Layers";
 
-        /// <summary><see cref="TypeGeneratorSettings" /> wrapped in a <see cref="SerializedObject" />.</summary>
+        /// <summary><see cref="TagLayerTypeGenerator.Editor.TypeGeneratorSettings" /> wrapped in a <see cref="SerializedObject" />.</summary>
         private SerializedObject _settings;
 
         /// <inheritdoc />
@@ -34,33 +33,19 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         /// <inheritdoc />
         public override void OnGUI(string searchContext)
         {
-            EditorGUILayout.LabelField(nameof(TypeGeneratorSettings.Tag), EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(_settings.FindProperty($"{nameof(TypeGeneratorSettings.Tag)}.{nameof(TypeGeneratorSettings.Tag.AutoGenerate)}"), Styles.AutoGenerate);
-            EditorGUILayout.DelayedTextField(_settings.FindProperty($"{nameof(TypeGeneratorSettings.Tag)}.{nameof(TypeGeneratorSettings.Tag.TypeName)}"), Styles.TypeName);
-            EditorGUILayout.DelayedTextField(_settings.FindProperty($"{nameof(TypeGeneratorSettings.Tag)}.{nameof(TypeGeneratorSettings.Tag.FilePath)}"), Styles.FilePath);
-            EditorGUILayout.DelayedTextField(_settings.FindProperty($"{nameof(TypeGeneratorSettings.Tag)}.{nameof(TypeGeneratorSettings.Tag.Namespace)}"), Styles.Namespace);
-            EditorGUILayout.PropertyField(_settings.FindProperty($"{nameof(TypeGeneratorSettings.Tag)}.{nameof(TypeGeneratorSettings.Tag.AssemblyDefinition)}"),
-                Styles.AssemblyDefinition);
-
-            EditorGUILayout.Space();
-
-            EditorGUILayout.LabelField(nameof(TypeGeneratorSettings.Layer), EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(_settings.FindProperty($"{nameof(TypeGeneratorSettings.Layer)}.{nameof(TypeGeneratorSettings.Layer.AutoGenerate)}"), Styles.AutoGenerate);
-            EditorGUILayout.DelayedTextField(_settings.FindProperty($"{nameof(TypeGeneratorSettings.Layer)}.{nameof(TypeGeneratorSettings.Layer.TypeName)}"), Styles.TypeName);
-            EditorGUILayout.DelayedTextField(_settings.FindProperty($"{nameof(TypeGeneratorSettings.Layer)}.{nameof(TypeGeneratorSettings.Layer.FilePath)}"), Styles.FilePath);
-            EditorGUILayout.DelayedTextField(_settings.FindProperty($"{nameof(TypeGeneratorSettings.Layer)}.{nameof(TypeGeneratorSettings.Layer.Namespace)}"), Styles.Namespace);
-            EditorGUILayout.PropertyField(_settings.FindProperty($"{nameof(TypeGeneratorSettings.Layer)}.{nameof(TypeGeneratorSettings.Layer.AssemblyDefinition)}"),
-                Styles.AssemblyDefinition);
-
-            EditorGUILayout.Space();
+            PropertiesGUI(nameof(TypeGeneratorSettings.Tag));
+            PropertiesGUI(nameof(TypeGeneratorSettings.Layer));
 
             EditorGUILayout.LabelField("Actions", EditorStyles.boldLabel);
+
             EditorGUI.BeginDisabledGroup(!TagTypeGenerator.Generator.CanGenerate());
             if (GUILayout.Button("Regenerate Tag Type File")) TagTypeGenerator.Generator.GenerateFile();
             EditorGUI.EndDisabledGroup();
+
             EditorGUI.BeginDisabledGroup(!LayerTypeGenerator.Generator.CanGenerate());
             if (GUILayout.Button("Regenerate Layer Type File")) LayerTypeGenerator.Generator.GenerateFile();
             EditorGUI.EndDisabledGroup();
+
             EditorGUILayout.LabelField("Open", EditorStyles.boldLabel);
             if (GUILayout.Button("Settings Asset")) Selection.SetActiveObjectWithContext(_settings.targetObject, _settings.context);
             if (GUILayout.Button("Tags and Layers")) SettingsService.OpenProjectSettings(TagsAndLayersProjectSettings);
@@ -68,13 +53,24 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
             _settings.ApplyModifiedPropertiesWithoutUndo();
         }
 
+        private void PropertiesGUI(string property)
+        {
+            EditorGUILayout.LabelField(property, EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(_settings.FindProperty($"{property}.{nameof(TypeGeneratorSettings.Settings.AutoGenerate)}"), Styles.AutoGenerate);
+            EditorGUILayout.DelayedTextField(_settings.FindProperty($"{property}.{nameof(TypeGeneratorSettings.Settings.TypeName)}"), Styles.TypeName);
+            EditorGUILayout.DelayedTextField(_settings.FindProperty($"{property}.{nameof(TypeGeneratorSettings.Settings.FilePath)}"), Styles.FilePath);
+            EditorGUILayout.DelayedTextField(_settings.FindProperty($"{property}.{nameof(TypeGeneratorSettings.Settings.Namespace)}"), Styles.Namespace);
+            EditorGUILayout.PropertyField(_settings.FindProperty($"{property}.{nameof(TypeGeneratorSettings.Settings.AssemblyDefinition)}"), Styles.AssemblyDefinition);
+
+            EditorGUILayout.Space();
+        }
+
         /// <summary>Creates the <see cref="SettingsProvider" /> for the Project Settings window.</summary>
         /// <returns>The <see cref="SettingsProvider" /> for the Project Settings window.</returns>
         [SettingsProvider]
         [NotNull]
-        private static SettingsProvider CreateTagClassGeneratorSettingsProvider() =>
-            new TypeGeneratorSettingsProvider(ProjectSettingPath, SettingsScope.Project)
-                {keywords = GetSearchKeywordsFromGUIContentProperties<Styles>()};
+        private static SettingsProvider CreateTagClassGeneratorSettingsProvider() => new TypeGeneratorSettingsProvider(ProjectSettingPath, SettingsScope.Project)
+            {keywords = GetSearchKeywordsFromGUIContentProperties<Styles>()};
 
         /// <summary>Styles for the <see cref="SettingsProvider" />.</summary>
         private /*readonly*/ struct Styles

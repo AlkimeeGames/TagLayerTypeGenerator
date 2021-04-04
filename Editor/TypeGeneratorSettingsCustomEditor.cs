@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 {
-    /// <summary>Custom inspector for <see cref="TypeGeneratorSettings" />.</summary>
+    /// <summary>Custom inspector for <see cref="TagLayerTypeGenerator.Editor.TypeGeneratorSettings" />.</summary>
     [CustomEditor(typeof(TypeGeneratorSettings))]
     internal sealed class TypeGeneratorSettingsCustomEditor : UnityEditor.Editor
     {
