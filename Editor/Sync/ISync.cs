@@ -3,7 +3,7 @@
 namespace AlkimeeGames.TagLayerTypeGenerator.Editor.Sync
 {
     /// <summary>Syncs values in a project with values in a type.</summary>
-    internal interface ISync
+    public interface ISync
     {
         /// <summary>Are the values in the Type the same as the values in the Project.</summary>
         /// <param name="generatingType">The type to sync with.</param>

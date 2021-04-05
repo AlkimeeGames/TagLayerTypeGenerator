@@ -86,7 +86,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor.Settings
 
         /// <summary>Type generation settings.</summary>
         [Serializable]
-        internal sealed class Settings
+        public sealed class Settings
         {
             /// <summary>When Assembly Definitions are not in use, Unity puts all scripts in this assembly.</summary>
             private const string DefaultUnityAssemblyName = "Assembly-CSharp";

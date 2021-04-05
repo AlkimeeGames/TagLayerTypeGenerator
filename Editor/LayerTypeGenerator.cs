@@ -12,7 +12,7 @@ using static System.String;
 namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 {
     /// <summary>Generates a file containing a type; which contains constant int definitions for each Layer in the project.</summary>
-    internal sealed class LayerTypeGenerator : TypeGenerator<LayerTypeGenerator>
+    public sealed class LayerTypeGenerator : TypeGenerator<LayerTypeGenerator>
     {
         /// <inheritdoc />
         private LayerTypeGenerator([NotNull] TypeGeneratorSettings.Settings settings, ISync sync) : base(settings, sync)
