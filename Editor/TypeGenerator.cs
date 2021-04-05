@@ -72,7 +72,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
         private void OnProjectChanged()
         {
             if (!Settings.AutoGenerate || !CanGenerate()) return;
-            if (File.Exists(AbsoluteFilePath) && TypeAlreadyExists(GeneratingType) && !HasUpdates()) return;
+            if (File.Exists(AbsoluteFilePath) && TypeAlreadyExists(GeneratingType) && IsInSync()) return;
 
             GenerateFile();
         }
@@ -94,7 +94,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor
 
         /// <summary>Checks if the values defined in the type are the same as in Unity itself.</summary>
         /// <returns>True if the type members match the project values.</returns>
-        private bool HasUpdates() => _sync.HasUpdates(GeneratingType);
+        private bool IsInSync() => _sync.IsInSync(GeneratingType);
 
         private void SetupNamespaceAndType([NotNull] CodeCompileUnit codeCompileUnit)
         {

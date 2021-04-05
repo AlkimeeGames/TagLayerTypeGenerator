@@ -16,7 +16,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor.Sync
         private readonly HashSet<string> _inUnity = new HashSet<string>();
 
         /// <inheritdoc />
-        public bool HasUpdates([NotNull] Type generatingType)
+        public bool IsInSync([NotNull] Type generatingType)
         {
             if (generatingType == null) throw new ArgumentNullException(nameof(generatingType));
 
@@ -32,7 +32,7 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor.Sync
                 if (fieldInfo.IsLiteral)
                     _inType.Add(fieldInfo.Name);
 
-            return !_inType.SetEquals(_inUnity);
+            return _inType.SetEquals(_inUnity);
         }
     }
 }
