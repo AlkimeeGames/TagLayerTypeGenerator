@@ -1,9 +1,11 @@
 {
     "name": "AlkimeeGames.TagLayerTypeGenerator",
     "rootNamespace": "AlkimeeGames.TagLayerTypeGenerator",
+    "references": [],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": true,
+    "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": false,
     "defineConstraints": [],

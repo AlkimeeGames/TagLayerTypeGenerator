@@ -19,7 +19,6 @@ namespace AlkimeeGames.TagLayerTypeGenerator.Editor.Attributes
             else
                 property.intValue = EditorGUI.LayerField(position, label, property.intValue);
 
-
             EditorGUI.EndProperty();
         }
     }
